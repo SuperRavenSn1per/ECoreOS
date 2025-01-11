@@ -29,7 +29,7 @@ local function appInstall(file)
 end
 
 local function log(txt)
-    gui.writeLine(currentLine, txt)
+    gui.write(currentLine, txt)
     currentLine = currentLine + 1
 end
 

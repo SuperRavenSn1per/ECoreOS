@@ -28,6 +28,11 @@ local function appInstall(file)
     currentLine = currentLine + 1
 end
 
+local function log(txt)
+    gui.writeLine(currentLine, txt)
+    currentLine = currentLine + 1
+end
+
 if not fs.exists("/boot/boot_1.lua") then
     term.clear()
     term.setCursorPos(1,1)
@@ -84,7 +89,7 @@ while true do
             gui.clear()
             gui.title(_G.name .. " v" .. _G.version .. " - Installing " .. app .. "...", colors.blue)
             gui.primary.setCursorPos(1,3)
-            print("Installing files...")
+            log("Installing files...")
             appInstall("main.lua")
             local data = http.get(url .. "apps/" .. app .. "/" .. "data").readAll()
             local fData = textutils.unserialise(data)
@@ -93,11 +98,11 @@ while true do
             for i,file in pairs(extraFiles) do
                 appInstall(file)
             end
-            print("Files installed! Setting default configuration...")
+            log("Files installed! Setting default configuration...")
             for i,setting in pairs(config) do
                 konfig.set(setting.name, setting.value)
             end
-            print("Configuration complete! Rebooting...")
+            log("Configuration complete! Rebooting...")
             sleep(3)
             os.reboot()
         end

@@ -86,7 +86,7 @@ while true do
             gui.primary.setCursorPos(1,3)
             print("Installing files...")
             appInstall("main.lua")
-            local data = http.get(url .. "apps/" .. app .. "/" .. "data").readAll())
+            local data = http.get(url .. "apps/" .. app .. "/" .. "data").readAll()
             local fData = textutils.unserialise(data)
             local extraFiles = fData.extra_files
             local config = fData.default_config

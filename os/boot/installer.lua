@@ -31,7 +31,7 @@ if not fs.exists("/boot/boot_1.lua") then
             pre_install("os/boot/installer.lua", "/boot/installer.lua")
             pre_install("os/apis/ecore_gui.lua", "/apis/ecore_gui.lua")
             pre_install("os/apis/konfig.lua", "/apis/konfig.lua")
-            konfig = require("/apis/konfig.lua")
+            konfig = require("/apis/konfig")
             print("Setting default configuration...")
             konfig.set("require_modem", false)
             konfig.set("require_host", false)

@@ -1,7 +1,14 @@
 local konfig
 local gui
 
+local apps = {
+    "SecureDoor"
+}
+local app = ""
+
 local url = "https://raw.githubusercontent.com/SuperRavenSn1per/ECoreOS/refs/heads/main/"
+
+local currentLine = 4
 
 local function install(file, fileName)
     local dat = http.get(url .. file).readAll()
@@ -13,6 +20,12 @@ end
 local function pre_install(file, fileName)
     install(file, fileName)
     print(file .. " -> " .. fileName)
+end
+
+local function appInstall(file)
+    install("apps/" .. app .. "/" .. file, file)
+    gui.writeFormatted(currentLine, {file, colors.lime}, " installed!")
+    currentLine = currentLine + 1
 end
 
 if not fs.exists("/boot/boot_1.lua") then
@@ -49,4 +62,55 @@ if not fs.exists("/boot/boot_1.lua") then
         end
     end
 end
+
+konfig = require("/apis/konfig")
+gui = require("/apis/ecore_gui")
+
+gui.setPrimary(term.current())
+
+gui.clear()
+gui.title(_G.name .. " v" .. _G.version .. " - App Installer", colors.blue)
+gui.write(3, "[BACKSPACE] to boot OS")
+gui.write(5, "Please select an app below to install:")
+for i,cApp in pairs(apps) do
+    gui.writeFormatted(6 + i, {tostring(i) .. ". ", colors.lightGray}, cApp)
+end
+
+while true do 
+    local event, char = os.pullEvent()
+    if event == "char" then
+        app = apps[tonumber(char)]
+        if app then
+            gui.clear()
+            gui.title(_G.name .. " v" .. _G.version .. " - Installing " .. app .. "...", colors.blue)
+            gui.primary.setCursorPos(1,3)
+            print("Installing files...")
+            appInstall("main.lua")
+            local f = fs.open("temp", "w")
+            f.write(http.get(url .. "apps/" .. app .. "/" .. "data").readAll())
+            f.close()
+            local f = fs.open("temp", "r")
+            local data = f.readAll()
+            f.close()
+            print(data)
+            local fData = textutils.unserialise(data)
+            local extraFiles = fData.extra_files
+            local config = fData.default_config
+            for i,file in pairs(extraFiles) do
+                appInstall(file)
+            end
+            print("Files installed! Setting default configuration...")
+            for i,setting in pairs(config) do
+                konfig.set(setting.name, setting.value)
+            end
+            print("Configuration complete! Rebooting...")
+            sleep(3)
+            os.reboot()
+        end
+    elseif event == "key" and char == 259 then
+        shell.run("/boot/boot_1.lua")
+        break
+    end
+end
+
 

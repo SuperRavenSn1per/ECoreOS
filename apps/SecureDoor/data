@@ -1,5 +1,5 @@
 {
-  extra_files = {}
+  extra_files = {},
   default_config = {
     {name = "hide_passcode", value = false},
     {name = "require_modem", value = true},

@@ -1,0 +1,7 @@
+{
+  extra_files = {},
+  default_config = {
+    {name = "require_modem", value = true},
+    {name = "require_host", value = true}
+  }
+}

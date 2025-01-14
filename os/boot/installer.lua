@@ -2,7 +2,9 @@ local konfig
 local gui
 
 local apps = {
-    "SecureDoor"
+    "SecureDoor",
+    "SecureServer",
+    "SecureController"
 }
 local app = ""
 

@@ -13,7 +13,7 @@ local buttonHl = colors.blue
 gui.primary.setTextScale(0.5)
 
 local function onCorrect()
-    
+
 end
 
 local function drawInputBar(color)
@@ -44,9 +44,16 @@ end
 
 local function enter()
     input = table.concat(input)
-    if input == password then
+    rednet.send(konfig.get("host_id"), "pass " .. input)
+    local id, msg = rednet.receive()
+    if id == konfig.get("host_id") and msg == "correct" then
         drawInputBar(colors.lime)
         onCorrect()
+        sleep(1)
+        input = {}
+        drawInputBar()
+    elseif id == konfig.get("host_id") and msg == "locked" then
+        drawInputBar(colors.orange)
         sleep(1)
         input = {}
         drawInputBar()

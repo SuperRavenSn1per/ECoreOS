@@ -3,6 +3,6 @@
   default_config = {
     {name = "controller_id", value = 0},
     {name = "require_modem", value = true},
-    {name = "require_host", value = true}
+    {name = "require_host", value = false}
   }
 }

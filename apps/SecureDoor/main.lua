@@ -45,7 +45,7 @@ end
 local function enter()
     input = table.concat(input)
     rednet.send(konfig.get("host_id"), "pass " .. input)
-    local id, msg = rednet.receive()
+    local id, msg = rednet.receive(5)
     if id == konfig.get("host_id") and msg == "correct" then
         drawInputBar(colors.lime)
         onCorrect()
@@ -57,6 +57,8 @@ local function enter()
         sleep(1)
         input = {}
         drawInputBar()
+    elseif id == nil then
+        os.reboot()
     else
         drawInputBar(colors.red)
         sleep(1)

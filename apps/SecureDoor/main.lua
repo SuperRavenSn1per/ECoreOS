@@ -16,7 +16,7 @@ local function onCorrect()
 
 end
 
-local function drawInputBar(color)
+local function drawInputBar(color, text)
     local w,h = gui.primary.getSize()
     gui.primary.setCursorPos(3, 2)
     gui.primary.setBackgroundColor(color or colors.lightGray)

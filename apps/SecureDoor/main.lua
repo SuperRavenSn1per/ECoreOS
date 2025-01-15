@@ -17,10 +17,14 @@ local function onCorrect()
 end
 
 local function drawInputBar(color)
+    local w,h = gui.primary.getSize()
     gui.primary.setCursorPos(3, 2)
     gui.primary.setBackgroundColor(color or colors.lightGray)
     gui.primary.write("           ")
-    gui.primary.setCursorPos(3,2)
+    if text then
+        gui.primary.setCursorPos(math.floor(w / 2) - math.floor(#text / 2) + 1, 2)
+        gui.primary.write(text)
+    end
     gui.primary.setBackgroundColor(colors.black)
 end
 
@@ -47,21 +51,22 @@ local function enter()
     rednet.send(konfig.get("host_id"), "pass " .. input)
     local id, msg = rednet.receive(5)
     if id == konfig.get("host_id") and msg == "correct" then
-        drawInputBar(colors.lime)
-        onCorrect()
-        sleep(1)
-        input = {}
-        drawInputBar()
+        drawInputBar(colors.green, "CORRECT")
+        parallel.waitForAll(onCorrect, function()  
+            sleep(5)
+            input = {}
+            drawInputBar() 
+        end) 
     elseif id == konfig.get("host_id") and msg == "locked" then
-        drawInputBar(colors.orange)
-        sleep(1)
+        drawInputBar(colors.orange, "LOCKED")
+        sleep(5)
         input = {}
         drawInputBar()
     elseif id == nil then
         os.reboot()
     else
-        drawInputBar(colors.red)
-        sleep(1)
+        drawInputBar(colors.red, "INCORRECT")
+        sleep(5)
         input = {}
         drawInputBar()
     end

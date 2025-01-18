@@ -3,53 +3,55 @@ local konfig = require("/apis/konfig")
 
 gui.setPrimary(term.current())
 
-local currentLine = 3
-
 local function addStatus(txt, statusType)
-    local color = statusType == "s" and colors.lime or statusType == "w" and colors.orange or statusType == "e" and colors.red
-    local symbol = statusType == "s" and "+" or statusType == "w" and "?" or statusType == "e" and "!"
-    gui.writeFormatted(currentLine, "[", {symbol, color}, "] ", {txt, colors.lightGray})
+    local color = statusType == "u" and colors.gray or statusType == "s" and colors.lime or statusType == "w" and colors.orange or statusType == "e" and colors.red
+    local symbol = statusType == "u" and "-" or statusType == "s" and "+" or statusType == "w" and "?" or statusType == "e" and "!"
+    gui.printFormatted("[", {symbol, color}, "] ", {txt, colors.lightGray})
     if statusType == "e" then
-        sleep(3)
+        sleep(5)
         os.reboot()
     end
-    currentLine = currentLine + 1
 end
 
 gui.clear()
 gui.title(_G.name .. " v" .. _G.version .. " - Booting...", colors.blue)
-local w,h = term.getSize()
-gui.write(h, _G.credit)
 
-addStatus("Welcome to ECoreOS. Booting now!", "s")
-if konfig.get("require_host") == true and konfig.get("require_modem") == false then
-    addStatus("REQUIRE_HOST is true, but not REQUIRE_MODEM!", "w")
-    addStatus("Changing REQUIRE_HOST to false.", "s")
-    konfig.set("require_host", false)
-end
-if konfig.get("require_modem") == true then
-    addStatus("Modem required. Checking for modem...", "s")
-    if peripheral.find("modem") then
-        addStatus("Modem found!", "s")
-        peripheral.find("modem", rednet.open)
-    else
-        addStatus("Modem not found. Please add a modem!", "e")
-    end
+gui.setPos(1,3)
+addStatus("Welcome to ECoreOS! Booting now...", "u")
+addStatus("Checking for required peripherals...", "u")
+if #konfig.getRequired() == 0 then
+    addStatus("No peripherals required!", "s")
 else
-    addStatus("Modem not required.", "s")
+    for i,p in pairs(konfig.getRequired()) do
+        if peripheral.find(p) then
+            addStatus("'" .. p .. "' " .. "is present.", "s")
+        else
+            addStatus("'" .. p .. "' " .. " is required but not present.", "e")
+        end
+    end
+    addStatus("All required peripherals are present!", "s")
 end
-if konfig.get("require_host") == true then
-    addStatus("Host required. Contacting host...", "s")
+if peripheral.find("modem") then
+    addStatus("Opening Rednet on modem...", "u")
+    peripheral.find("modem", rednet.open)
+    addStatus("Rednet is opened!", "s")
+end
+addStatus("Checking if host is required...", "u")
+if konfig.get("host_id") < 0 then
+    addStatus("No host is required!", "s")
+elseif konfig.get("host_id") >= 0 and not peripheral.find("modem") then
+    addStatus("Host is required but there is no modem present. Please add a modem or change this setting!", "e")
+else
+    addStatus("Host is required. Pinging...", "u")
     rednet.send(konfig.get("host_id"), "call")
     local id, msg = rednet.receive(5)
     if not id or id ~= konfig.get("host_id") or msg ~= "here" then
-        addStatus("Host not found.", "e")
+        addStatus("Host did not respond.", "e")
     else
-        addStatus("Host found.", "s")
+        addStatus("Host responded.", "s")
     end
-else
-    addStatus("Host not required.", "s")
 end
+addStatus("Boot process complete.", "s")
 if fs.exists("/main.lua") then
     shell.run("/main.lua")
 else

@@ -1,7 +1,7 @@
 local url = "https://raw.githubusercontent.com/SuperRavenSn1per/ECoreOS/refs/heads/main/os/"
 
 local function install(file, fileName)
-    local dat = http.get(file).readAll()
+    local dat = http.get(url .. file).readAll()
     local f = fs.open(fileName, "w")
     f.write(dat)
     f.close()

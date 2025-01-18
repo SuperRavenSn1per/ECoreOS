@@ -3,5 +3,6 @@
   default_config = {
     {name = "require_modem", value = true},
     {name = "require_host", value = true}
-  }
+  },
+  required = {"modem"}
 }

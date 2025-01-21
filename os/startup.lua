@@ -1,6 +1,9 @@
 _G.name = "ECoreOS"
 _G.version = "1.0"
 
+local gui = require("/apis/ecore_gui")
+local konfig = require("/apis/konfig")
+
 if konfig.get("require_login") == true then
     gui.clear()
     gui.title(_G.name .. " v" .. _G.version .. " - Login", colors.red)

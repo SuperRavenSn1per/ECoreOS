@@ -119,7 +119,7 @@ while true do
                 break
             end
         elseif char == 259 then
-            shell.run("/boot_1.lua")
+            shell.run("/boot/boot_1.lua")
             break
         end
     end

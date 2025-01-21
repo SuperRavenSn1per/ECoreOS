@@ -6,18 +6,8 @@ gui.setPrimary(term.current())
 gui.clear(colors.black)
 gui.title("EBM Secure Server v1.0", colors.orange)
 
-local currentLine = 3
-
 local function log(id, label, txt)
-    local w,h = gui.primary.getSize()
-    if currentLine > h then 
-        for i = 3, h do
-            gui.clearLine(i)
-        end
-        currentLine = 3
-    end
-    gui.writeFormatted(currentLine, {"( ", colors.gray}, {id, colors.lightGray}, {" | ", colors.gray}, {label, colors.lightGray}, {" ) ", colors.gray}, txt)
-    currentLine = currentLine + 1
+    gui.printFormatted({"(", colors.gray}, {tostring(id) .. " ", colors.lightGray}, {"| ", colors.gray}, {label, colors.lightGray}, {") ", colors.gray}, txt)
 end
 
 local function changeData(terminal, value, newValue)
@@ -82,12 +72,14 @@ local commands = {
         if id == "all" then
             for i,terminal in pairs(fs.list("/verified/")) do
                 changeData(terminal, "locked", true)
+                rednet.send(tonumber(terminal), "lock")
                 rednet.send(sender, "success")
-                log(sender, "control", "Lockdown initiated!")
             end
+            log(sender, "control", "Lockdown initiated!")
         else
             if fs.exists("/verified/" .. id) then
                 changeData(id, "locked", true)
+                rednet.send(tonumber(id), "lock")
                 rednet.send(sender, "success")
                 log(sender, "control", "Terminal " .. id .. " has been locked.")
             else
@@ -100,12 +92,14 @@ local commands = {
         if id == "all" then
             for i,terminal in pairs(fs.list("/verified/")) do
                 changeData(terminal, "locked", false)
+                rednet.send(tonumber(terminal), "unlock")
                 rednet.send(sender, "success")
-                log(sender, "control", "Lockdown ended!")
             end
+            log(sender, "control", "Lockdown ended!")
         else
             if fs.exists("/verified/" .. id) then
                 changeData(id, "locked", false)
+                rednet.send(tonumber(id), "unlock")
                 rednet.send(sender, "success")
                 log(sender, "control", "Terminal " .. id .. " has been unlocked.")
             else
@@ -119,6 +113,8 @@ local commands = {
 if not fs.exists("/verified") then
     fs.makeDir("/verified")
 end
+
+gui.setPos(1, 3)
 
 while true do
     id, msg = rednet.receive()
@@ -149,7 +145,7 @@ while true do
         local ok, err = pcall(function() commands[args[1]](id, args[2], args[3]) end)
         if not ok then
             rednet.send(id, "Unknown error or command not valid!")
-            log(id, "control", "Invalid command or unknown error!")
+            log(id, "control", "Error: " .. err)
         end
     end
 end

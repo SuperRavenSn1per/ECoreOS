@@ -9,7 +9,7 @@ local apps = {
 
 local app = ""
 
-local url = "https://raw.githubusercontent.com/SuperRavenSn1per/ECoreOS/refs/heads/experimental/apps/"
+local url = "https://raw.githubusercontent.com/SuperRavenSn1per/ECoreOS/refs/heads/main/apps/"
 
 local function install(file, fileName)
     local dat = http.get(url .. file).readAll()

@@ -56,7 +56,7 @@ while true do
             os.reboot()
         end
     elseif event == "key" and char == 259 then
-        shell.run("/boot_1.lua")
+        shell.run("/boot/boot_1.lua")
         break
     end
 end

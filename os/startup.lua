@@ -20,4 +20,6 @@ if konfig.get("require_login") == true then
     else
         shell.run("/boot/boot_1.lua")
     end
+else
+    shell.run("/boot/boot_1.lua")
 end

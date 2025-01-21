@@ -17,58 +17,78 @@ local function onCorrect()
 end
 
 local function drawInputBar(color, text)
-    local w,h = gui.primary.getSize()
-    gui.primary.setCursorPos(3, 2)
-    gui.primary.setBackgroundColor(color or colors.lightGray)
-    gui.primary.write("           ")
+    gui.setPos(3, 2)
+    gui.setBG(color or colors.lightGray)
+    gui.write("           ")
     if text then
-        gui.primary.setCursorPos(math.floor(w / 2) - math.floor(#text / 2) + 1, 2)
-        gui.primary.write(text)
+        gui.setPos(math.ceil(gui.w / 2 - #text / 2), 2)
+        gui.write(text)
     end
-    gui.primary.setBackgroundColor(colors.black)
+    gui.setBG(colors.black)
 end
 
 local function addInput(num)
-    table.insert(input, num)
-    gui.primary.setCursorPos(2 + #input, 2)
-    gui.primary.setBackgroundColor(colors.lightGray)
-    gui.primary.write(konfig.get("hide_passcode") and "*" or num)
-    gui.primary.setBackgroundColor(colors.black)
+    if konfig.get("locked") == false then
+        table.insert(input, num)
+        gui.setPos(2 + #input, 2)
+        gui.setBG(colors.lightGray)
+        gui.write(konfig.get("hide_passcode") and "*" or num)
+        gui.setBG(colors.black)
+    end
 end
 
 local function backspace()
-    if #input > 0 then
-       table.remove(input, #input)
-       gui.primary.setCursorPos(3 + #input, 2)
-       gui.primary.setBackgroundColor(colors.lightGray)
-       gui.primary.write(" ")
-       gui.primary.setBackgroundColor(colors.black)   
+    if konfig.get("locked") == false then
+        if #input > 0 then
+            table.remove(input, #input)
+            gui.setPos(3 + #input, 2)
+            gui.setBG(colors.lightGray)
+            gui.write(" ")
+            gui.setBG(colors.black)   
+        end
     end
 end
 
 local function enter()
-    input = table.concat(input)
-    rednet.send(konfig.get("host_id"), "pass " .. input)
-    local id, msg = rednet.receive(5)
-    if id == konfig.get("host_id") and msg == "correct" then
-        drawInputBar(colors.green, "CORRECT")
-        parallel.waitForAll(onCorrect, function()  
+    if konfig.get("locked") == false then
+        input = table.concat(input)
+        rednet.send(konfig.get("host_id"), "pass " .. input)
+        local id, msg = rednet.receive(5)
+        if id == konfig.get("host_id") and msg == "correct" then
+            drawInputBar(colors.green, "CORRECT")
+            parallel.waitForAll(onCorrect, function()  
+                sleep(5)
+                input = {}
+                drawInputBar() 
+            end) 
+        elseif id == konfig.get("host_id") and msg == "locked" then
+            drawInputBar(colors.orange, "LOCKED")
             sleep(5)
             input = {}
-            drawInputBar() 
-        end) 
-    elseif id == konfig.get("host_id") and msg == "locked" then
-        drawInputBar(colors.orange, "LOCKED")
-        sleep(5)
-        input = {}
-        drawInputBar()
-    elseif id == nil then
-        os.reboot()
-    else
-        drawInputBar(colors.red, "INCORRECT")
-        sleep(5)
-        input = {}
-        drawInputBar()
+            drawInputBar()
+        elseif id == nil then
+            os.reboot()
+        else
+            drawInputBar(colors.red, "INCORRECT")
+            sleep(5)
+            input = {}
+            drawInputBar()
+        end
+    end
+end
+
+local function lock()
+    while true do
+        local id,msg = rednet.receive()
+        if id == konfig.get("host_id") then
+            if msg == "lock" then
+                konfig.set("locked", true)
+                drawInputBar(colors.orange, "LOCKED")
+            elseif msg == "unlock" then
+                konfig.set("locked", false)
+                drawInputBar()
+            end
+        end
     end
 end
 
@@ -86,14 +106,14 @@ gui.buttons.add("confirm", ">", 11, 10, colors.green, colors.lime, enter)
 gui.buttons.add("backspace", "x", 3, 10, colors.red, colors.orange, backspace)
 
 gui.clear()
-drawInputBar()
+drawInputBar(konfig.get("locked") == true and colors.orange or nil, konfig.get("locked") == true and "LOCKED" or nil)
 
 gui.setPrimary(term.current())
 gui.clear()
 gui.title("EBM SecureDoor v1.0", colors.red)
-gui.write(3, "Welcome to EBM SecureDoor! :)")
-gui.write(4, "This program was created by EBM Technologies")
+gui.writeLine(3, "Welcome to EBM SecureDoor! :)")
+gui.writeLine(4, "This program was created by EBM Technologies")
 gui.setPrimary(peripheral.find("monitor"))
 
 gui.buttons.drawAll()
-gui.buttons.update()
+parallel.waitForAll(gui.buttons.update, lock)

@@ -2,6 +2,7 @@
   extra_files = {},
   default_config = {
     {name = "hide_passcode", value = false},
+    {name = "locked", value = false}
   },
   required = {"modem", "monitor"}
 }

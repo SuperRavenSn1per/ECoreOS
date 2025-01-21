@@ -18,7 +18,8 @@ while true do
     if string.lower(input) == "y" then
         print("Installing files...")
         install("startup.lua", "/startup.lua")
-        install("boot/boot_1.lua", "/boot/boot_1.lua")
+        install("boot/boot_1.lua", "/boot/boot_1.lua") 
+        install("boot/boot_2.lua", "/boot/boot_2.lua")
         install("boot/configuration.lua", "/boot/configuration.lua")
         install("boot/installer.lua", "/boot/installer.lua")
         install("apis/ecore_gui.lua", "/apis/ecore_gui.lua")

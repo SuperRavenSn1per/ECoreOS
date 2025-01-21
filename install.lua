@@ -21,7 +21,6 @@ while true do
         install("boot/boot_1.lua", "/boot/boot_1.lua")
         install("boot/configuration.lua", "/boot/configuration.lua")
         install("boot/installer.lua", "/boot/installer.lua")
-        install("boot/login.lua", "/boot/login.lua")
         install("apis/ecore_gui.lua", "/apis/ecore_gui.lua")
         install("apis/konfig.lua", "/apis/konfig.lua")
         konfig = require("/apis/konfig")

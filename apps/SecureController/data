@@ -2,7 +2,7 @@
   extra_files = {},
   default_config = {
     {name = "host_id", value = 0},
-    {name = "require_login", value = true)
+    {name = "require_login", value = true}
     
   },
   required = {"modem"}

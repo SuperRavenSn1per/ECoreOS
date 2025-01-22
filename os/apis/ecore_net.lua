@@ -53,7 +53,7 @@ function net.send(id, msg)
 end
 
 function net.broadcast(msg)
-    net.modem.transit(BROADCAST_CHANNEL, getId(), encrypt(msg))
+    net.modem.transmit(BROADCAST_CHANNEL, getId(), encrypt(msg))
 end
 
 function net.receive()

@@ -23,6 +23,7 @@ while true do
         install("boot/configuration.lua", "/boot/configuration.lua")
         install("boot/installer.lua", "/boot/installer.lua")
         install("apis/ecore_gui.lua", "/apis/ecore_gui.lua")
+        install("apis/ecore_net.lua", "/apis/ecore_net.lua")
         install("apis/konfig.lua", "/apis/konfig.lua")
         konfig = require("/apis/konfig")
         print("Setting default configuration...")

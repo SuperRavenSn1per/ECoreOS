@@ -2,49 +2,26 @@ _G.name = "ECoreOS"
 _G.version = "1.0"
 
 local gui = require("/apis/ecore_gui")
+local konfig = require("/apis/konfig")
 
 gui.setPrimary(term.current())
 
-local boot = ""
-
-local selections = {
-    {"Boot OS", "/boot/boot_1.lua"},
-    {"Configuration", "/boot/configuration.lua"},
-    {"App Installer", "/boot/installer.lua"}
-}
-
-local function countdown()
-    local t = 5
-    repeat
-        gui.writeLine(5 + #selections + 1, "Booting OS in " .. tostring(t) .. "...")
-        sleep(1)
-        t = t - 1
-    until t == 0
-    boot = "/boot/boot_1.lua"
-
-    return
-end
-
-local function makeSelection()
-    while true do
-        local event, char = os.pullEvent("char")
-        if selections[tonumber(char)] then
-            boot = selections[tonumber(char)][2]
-
-            return
-        end
+if konfig.get("require_login") == true then
+    gui.clear()
+    gui.title(_G.name .. " v" .. _G.version .. " - Login", colors.red)
+    gui.writeLine(3, "Username: ")
+    gui.writeLine(4, "Password: ")
+    gui.setPos(1 + string.len("Username: "), 3)
+    local username = read()
+    gui.setPos(1 + string.len("Password: "), 4)
+    local password = read("*")
+    if username ~= konfig.get("username") and password ~= konfig.get("password") then
+        gui.writeFormatted(6, {"Incorrect username or password!", colors.red})
+        sleep(3)
+        os.reboot()
+    else
+        shell.run("/boot/boot_1.lua")
     end
+else
+    shell.run("/boot/boot_1.lua")
 end
-
-gui.clear()
-gui.title(_G.name .. " v" .. _G.version .. " - Boot Menu", colors.blue)
-gui.writeLine(3, "Press number key of selection below:")
-gui.setPos(1, 5)
-
-for i,selection in pairs(selections) do
-    gui.printFormatted({i .. ". ", colors.lightGray}, selection[1])
-end
-
-parallel.waitForAny(countdown, makeSelection)
-
-shell.run(boot)

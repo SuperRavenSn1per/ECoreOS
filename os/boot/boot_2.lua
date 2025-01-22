@@ -1,5 +1,6 @@
 local gui = require("/apis/ecore_gui")
 local konfig = require("/apis/konfig")
+local net = require("/apis/ecore_net")
 
 gui.setPrimary(term.current())
 
@@ -19,6 +20,9 @@ gui.title(_G.name .. " v" .. _G.version .. " - Booting...", colors.blue)
 gui.setPos(1,3)
 addStatus("Welcome to ECoreOS! Booting now...", "u")
 addStatus("Checking for required peripherals...", "u")
+if konfig.get("host_id") >= 0 then
+    konfig.require("modem")
+end
 if #konfig.getRequired() == 0 then
     addStatus("No peripherals required!", "s")
 else
@@ -32,19 +36,17 @@ else
     addStatus("All required peripherals are present!", "s")
 end
 if peripheral.find("modem") then
-    addStatus("Opening Rednet on modem...", "u")
+    addStatus("Opening network on modem...", "u")
     peripheral.find("modem", rednet.open)
-    addStatus("Rednet is opened!", "s")
+    addStatus("Network is opened!", "s")
 end
 addStatus("Checking if host is required...", "u")
 if konfig.get("host_id") < 0 then
     addStatus("No host is required!", "s")
-elseif konfig.get("host_id") >= 0 and not peripheral.find("modem") then
-    addStatus("Host is required but there is no modem present. Please add a modem or change this setting!", "e")
 else
     addStatus("Host is required. Pinging...", "u")
-    rednet.send(konfig.get("host_id"), "call")
-    local id, msg = rednet.receive(5)
+    net.send(konfig.get("host_id"), "call")
+    local id, msg = net.receive(5)
     if not id or id ~= konfig.get("host_id") or msg ~= "here" then
         addStatus("Host did not respond.", "e")
     else

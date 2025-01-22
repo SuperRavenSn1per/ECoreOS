@@ -1,5 +1,6 @@
 local gui = require("/apis/ecore_gui")
 local konfig = require("/apis/konfig")
+local net = require("/apis/ecore_net")
 
 gui.setPrimary(term.current())
 
@@ -31,40 +32,40 @@ local commands = {
             default.locked = false
             f.write(textutils.serialise(default))
             f.close()
-            rednet.send(sender, "success")
+            net.send(sender, "success")
             log(sender, "control", "Terminal " .. id .. " has been verified.")
         else
-            rednet.send(sender, "Terminal already verified!")
+            net.send(sender, "Terminal already verified!")
             log(sender, "control", "Terminal " .. id .. " already verified!")
         end
     end,
     ["delete"] = function(sender, id)
         if fs.exists("/verified/" .. id) then
             fs.delete("/verified/" .. id)
-            rednet.send(sender, "success")
+            net.send(sender, "success")
             log(sender, "control", "Terminal " .. id .. " has been deleted.")
         else
-            rednet.send(sender, "Terminal does not exist!")
+            net.send(sender, "Terminal does not exist!")
             log(sender, "control", "Terminal " .. id .. " does not exist!")
         end
     end,
     ["label"] = function(sender, id, label)
         if fs.exists("/verified/" .. id) then
             changeData(id, "label", label)
-            rednet.send(sender, "success")
+            net.send(sender, "success")
             log(sender, "control", "Terminal " .. id .. " has been labeled.")
         else
-            rednet.send(sender, "Terminal does not exist!")
+            net.send(sender, "Terminal does not exist!")
             log(sender, "control", "Terminal " .. id .. " does not exist!")
         end
     end,
     ["changepass"] = function(sender, id, newpass)
         if fs.exists("/verified/" .. id) then
             changeData(id, "password", newpass)
-            rednet.send(sender, "success")
+            net.send(sender, "success")
             log(sender, "control", "Terminal " .. id .. " password changed.")
         else
-            rednet.send(sender, "Terminal does not exist!")
+            net.send(sender, "Terminal does not exist!")
             log(sender, "control", "Terminal " .. id .. " does not exist!")
         end
     end,
@@ -72,18 +73,18 @@ local commands = {
         if id == "all" then
             for i,terminal in pairs(fs.list("/verified/")) do
                 changeData(terminal, "locked", true)
-                rednet.send(tonumber(terminal), "lock")
-                rednet.send(sender, "success")
+                net.send(tonumber(terminal), "lock")
+                net.send(sender, "success")
             end
             log(sender, "control", "Lockdown initiated!")
         else
             if fs.exists("/verified/" .. id) then
                 changeData(id, "locked", true)
-                rednet.send(tonumber(id), "lock")
-                rednet.send(sender, "success")
+                net.send(tonumber(id), "lock")
+                net.send(sender, "success")
                 log(sender, "control", "Terminal " .. id .. " has been locked.")
             else
-                rednet.send(sender, "Terminal does not exist!")
+                net.send(sender, "Terminal does not exist!")
                 log(sender, "control", "Terminal " .. id .. " does not exist!")
             end
         end
@@ -92,18 +93,18 @@ local commands = {
         if id == "all" then
             for i,terminal in pairs(fs.list("/verified/")) do
                 changeData(terminal, "locked", false)
-                rednet.send(tonumber(terminal), "unlock")
-                rednet.send(sender, "success")
+                net.send(tonumber(terminal), "unlock")
+                net.send(sender, "success")
             end
             log(sender, "control", "Lockdown ended!")
         else
             if fs.exists("/verified/" .. id) then
                 changeData(id, "locked", false)
-                rednet.send(tonumber(id), "unlock")
-                rednet.send(sender, "success")
+                net.send(tonumber(id), "unlock")
+                net.send(sender, "success")
                 log(sender, "control", "Terminal " .. id .. " has been unlocked.")
             else
-                rednet.send(sender, "Terminal does not exist!")
+                net.send(sender, "Terminal does not exist!")
                 log(sender, "control", "Terminal " .. id .. " does not exist!")
             end
         end
@@ -117,13 +118,13 @@ end
 gui.setPos(1, 3)
 
 while true do
-    id, msg = rednet.receive()
+    id, msg = net.receive()
     local args = {}
     for string in msg:gmatch("[^%s]+") do
         table.insert(args, string)
     end
     if msg == "call" then
-        rednet.send(id, "here")
+        net.send(id, "here")
     end
     if fs.exists("/verified/".. tostring(id)) then
         local f = fs.open("/verified/" .. tostring(id), "r")
@@ -131,20 +132,20 @@ while true do
         local tData = textutils.unserialise(data)
         if args[1]:lower() == "pass" then
             if args[2] == tData.password and tData.locked == false then
-                rednet.send(id, "correct")
+                net.send(id, "correct")
                 log(id, tData.label, "Correct password entered.")
             elseif tData.locked == true then
-                rednet.send(id, "locked")
+                net.send(id, "locked")
                 log(id, tData.label, "Denied. Terminal is locked.")
             else
-                rednet.send(id, "incorrect")
+                net.send(id, "incorrect")
                 log(id, tData.label, "Incorrect password entered.")
             end
         end
     elseif id == konfig.get("controller_id") then
         local ok, err = pcall(function() commands[args[1]](id, args[2], args[3]) end)
         if not ok then
-            rednet.send(id, "Unknown error or command not valid!")
+            net.send(id, "Unknown error or command not valid!")
             log(id, "control", "Error: " .. err)
         end
     end

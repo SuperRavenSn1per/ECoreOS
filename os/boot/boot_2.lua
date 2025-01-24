@@ -60,7 +60,7 @@ else
         else
             local newHost = parts[2]
             addStatus("A valid host responded. Setting " .. newHost .. " as host ID.", "s")
-            konfig.set("host_id", tonumber(newHost)
+            konfig.set("host_id", tonumber(newHost))
         end
     else
         addStatus("Host responded.", "s")

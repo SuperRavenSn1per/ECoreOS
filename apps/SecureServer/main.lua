@@ -11,6 +11,7 @@ local function log(id, label, txt)
     local x, y = gui.getPos()
     if y >= gui.h - 1 then
         gui.title("EBM Secure Server v1.0", colors.orange)
+        gui.clearLine(2)
         gui.setPos(x,y)
     end
 end

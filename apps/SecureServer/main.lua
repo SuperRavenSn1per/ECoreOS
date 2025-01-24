@@ -30,7 +30,7 @@ while true do
         if tonumber(parts[2]) == id then
             verify(id)
             log(id, nil, "Terminal " .. id .. " self verified succesfully.")
-            rednet.send(id, "verifconfirm")
+            rednet.send(id, "verifconfirm " .. os.getComputerID())
         else
             log(id, nil, "Terminal attempted to verify but had an invalid signature.")
         end

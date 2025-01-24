@@ -22,7 +22,7 @@ addStatus("Checking for required peripherals...", "u")
 if konfig.get("host_id") >= 0 then
     konfig.require("modem")
 end
-addStatus("Host is required but no modem is. Setting modem to required, change HOST_ID to less than 0 if a host is not required.")
+addStatus("Host is required but no modem is. Setting modem to required, change HOST_ID to less than 0 if a host is not required.", "w")
 if #konfig.getRequired() == 0 then
     addStatus("No peripherals required!", "s")
 else

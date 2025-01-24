@@ -52,13 +52,16 @@ else
         rednet.broadcast("verifself " .. os.getComputerID())
         local id, msg = rednet.receive(3)
         local parts = {}
-        for word in msg:gmatch("[^%s]+") do
-            table.insert(parts, word)
+        local newHost
+        if msg then
+            for word in msg:gmatch("[^%s]+") do
+                table.insert(parts, word)
+            end
+            local newHost = parts[2]
         end
         if not id or parts[1] ~= "verifconfirm" then
             addStatus("No valid host was found. Please set up host and try again.", "e")
         else
-            local newHost = parts[2]
             addStatus("A valid host responded. Setting " .. newHost .. " as host ID.", "s")
             konfig.set("host_id", tonumber(newHost))
         end

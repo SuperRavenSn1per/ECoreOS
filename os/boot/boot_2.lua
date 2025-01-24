@@ -37,7 +37,7 @@ else
 end
 if peripheral.find("modem") then
     addStatus("Opening Rednet on modem...", "u")
-    rednet.open()
+    peripheral.find("modem", rednet.open)
     addStatus("Rednet is opened!", "s")
 end
 addStatus("Checking if host is required...", "u")

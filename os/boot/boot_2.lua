@@ -22,6 +22,7 @@ addStatus("Checking for required peripherals...", "u")
 if konfig.get("host_id") >= 0 then
     konfig.require("modem")
 end
+addStatus("Host is required but no modem is. Setting modem to required, change HOST_ID to less than 0 if a host is not required.")
 if #konfig.getRequired() == 0 then
     addStatus("No peripherals required!", "s")
 else
@@ -45,9 +46,22 @@ if konfig.get("host_id") < 0 then
 else
     addStatus("Host is required. Pinging...", "u")
     rednet.send(konfig.get("host_id"), "call")
-    local id, msg = rednet.receive(5)
+    local id, msg = rednet.receive(3)
     if not id or id ~= konfig.get("host_id") or msg ~= "here" then
-        addStatus("Host did not respond.", "e")
+        addStatus("Host did not respond. Trying to verify a new host...", "w")
+        rednet.broadcast("verifself " .. os.getComputerID())
+        local id, msg = rednet.receive(3)
+        local parts = {}
+        for word in msg:gmatch("[^%s]+") do
+            table.insert(parts, word)
+        end
+        if not id or parts[1] ~= "verifconfirm" then
+            addStatus("No valid host was found. Please set up host and try again.", "e")
+        else
+            local newHost = parts[2]
+            addStatus("A valid host responded. Setting " .. newHost .. " as host ID.")
+            konfig.set("host_id", tonumber(newHost)
+        end
     else
         addStatus("Host responded.", "s")
     end

@@ -8,6 +8,11 @@ gui.title("EBM Secure Server v1.0", colors.orange)
 
 local function log(id, label, txt)
     gui.printFormatted({"(", colors.gray}, {tostring(id) .. " ", colors.lightGray}, {"| ", colors.gray}, {label and label or "unlabeled", colors.lightGray}, {") ", colors.gray}, txt)
+    local x, y = gui.getPos()
+    if y >= gui.h - 1 then
+        gui.title("EBM Secure Server v1.0", colors.orange)
+        gui.setPos(x,y)
+    end
 end
 
 local function verify(id)

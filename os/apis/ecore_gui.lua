@@ -108,19 +108,24 @@ function gui.writeFormatted(line, ...)
 end
 
 function gui.print(str)
-    local words = {}
-    for word in str:gmatch("[^%s]+") do
-       table.insert(words, word)
-    end
-    for i,word in pairs(words) do
-        local x = gui.getPos()
+    for word in str:gmatch("%s*[^%s]+%s*") do
+        local x, y = gui.getPos()
         if x + #word > gui.w then
             skipLine()
         end
+        local x, y = gui.getPos()
+        if y > gui.h then
+            gui.primary.scroll(1)
+            gui.setPos(1, y - 1)
+        end
         gui.write(word)
-        gui.write(i == #words and "" or " ")
     end
     skipLine()
+    local x, y = gui.getPos()
+    if y > gui.h then
+        gui.primary.scroll(1)
+        gui.setPos(1, y - 1)
+    end
 end
 
 function gui.printFormatted(...)
@@ -129,43 +134,41 @@ function gui.printFormatted(...)
     for i,dat in pairs(formatting) do
         if type(dat) == "table" then
             gui.setFG(dat[2])
-            local words = {}
-            for word in dat[1]:gmatch("[^%s]+") do
-               table.insert(words, word)
-            end
-            for i,word in pairs(words) do
-                local x = gui.getPos()
+            for word in dat[1]:gmatch("%s*[^%s]+%s*") do
+                local x, y = gui.getPos()
                 if x + #word > gui.w then
                     skipLine()
                 end
-                gui.write(word)
-                if dat[1]:sub(#dat[1], #dat[1]) == " " then
-                    gui.write(" ")
-                else
-                    gui.write(i == #words and "" or " ")
+                local x, y = gui.getPos()
+                if y > gui.h then
+                    gui.primary.scroll(1)
+                    gui.setPos(1, y - 1)
                 end
+                gui.write(word)
             end
             gui.setFG(colors.white)
         else
-            local words = {}
-            for word in dat:gmatch("[^%s]+") do
-               table.insert(words, word)
-            end
-            for i,word in pairs(words) do
-                local x = gui.getPos()
+            for word in dat:gmatch("%s*[^%s]+%s*") do
+                local x, y = gui.getPos()
                 if x + #word > gui.w then
                     skipLine()
                 end
-                gui.write(word)
-                if dat:sub(#dat, #dat) == " " then
-                    gui.write(" ")
-                else
-                    gui.write(i == #words and "" or " ")
+                local x, y = gui.getPos()
+                if y > gui.h then
+                    gui.primary.scroll(1)
+                    gui.setPos(1, y - 1)
                 end
+                gui.write(word)
             end
         end
     end
     skipLine()
+    local x, y = gui.getPos()
+    if y > gui.h then
+        gui.primary.scroll(1)
+        gui.setPos(1, y - 1)
+    end
+    gui.setFG(colors.white)
 end
 
 function gui.buttons.add(label, txt, x, y, color, hlColor, func, arg)

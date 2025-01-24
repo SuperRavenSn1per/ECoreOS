@@ -28,8 +28,6 @@ while true do
         print("Setting default configuration...")
         konfig.set("host_id", -1)
         konfig.set("require_login", false)
-        konfig.set("username", "admin")
-        konfig.set("password", "0000")
         print("Installation complete! Rebooting...")
         sleep(3)
         os.reboot()

@@ -41,6 +41,9 @@ end
 
 local function verify(id)
     if not fs.exists("verified/" .. tostring(id)) then
+        local f = fs.open("verified/" .. tostring(id), "w")
+        f.write("{}")
+        f.close()
         changeData(id, "accessLevel", 1)
     end
 end

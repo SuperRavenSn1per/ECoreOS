@@ -32,7 +32,7 @@ local function changeData(id, data, newValue)
         local tData = fetchData(id)
         if tData then
             tData[data] = newValue
-            local f = fs.open("verified/" .. tostring(id))
+            local f = fs.open("verified/" .. tostring(id), "w")
             f.write(textutils.serialise(tData))
             f.close()
         end

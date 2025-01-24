@@ -18,8 +18,19 @@ local function verify(id)
     end
 end
 
+local function fetchData(id)
+    if fs.exists("verified/" .. tostring(id)) then
+        local f = fs.open("verified/" .. tostring(id), "r")
+        local data = textutils.unserialise(f.readAll())
+
+        return data
+    end
+
+    return {accessLevel = 0}
+end
+
 local commands = {
-    ["verifself"] = function(id, requestId)
+    ["verifself"] = {0, function(id, requestId)
         if tonumber(requestId) == id then
             verify(id)
             log(id, nil, "Terminal " .. id .. " self verified succesfully.")
@@ -27,20 +38,21 @@ local commands = {
         else
             log(id, nil, "Terminal attempted to verify but had an invalid signature.")
         end
-    end,
-    ["call"] = function(id)
+    end},
+    ["call"] = {1, function(id)
         if fs.exists("verified/" .. id) then
             log(id, nil, "Terminal online.")
             rednet.send(id, "here")
         else
             log(id, nil, "Unverified terminal attempted to connect.")
         end
-    end
+    end}
 }
 
 gui.setPos(1, 3)
 while true do
     local id, msg = rednet.receive()
+    local tData = fetchData(id)
     local parts = {}
     for word in msg:gmatch("[^%s]+") do
         table.insert(parts, word)
@@ -50,7 +62,9 @@ while true do
     for i = 2,#parts do
         table.insert(args, parts[i])
     end
-    if commands[command] then
-        commands[command](id, table.unpack(args))
+    if commands[command] and tData.accessLevel >= commands[commands][1] then
+        commands[command][2](id, table.unpack(args))
+    else
+        log(id, nil, "Invalid command given or terminal is unauthorized!")
     end
 end

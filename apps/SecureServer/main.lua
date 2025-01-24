@@ -35,6 +35,18 @@ local function fetchData(id)
     return {accessLevel = 0}
 end
 
+local function changeData(id, data, newValue)
+    if fs.exists("verified/" .. tostring(id)) then
+        local tData = fetchData(id)
+        if tData then
+            tData[data] = newValue
+            local f = fs.open("verified/" .. tostring(id))
+            f.write(textutils.serialise(tData))
+            f.close()
+        end
+    end
+end
+
 local commands = {
     ["verifself"] = {0, function(id, requestId)
         if tonumber(requestId) == id then

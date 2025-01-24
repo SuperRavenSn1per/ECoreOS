@@ -13,7 +13,7 @@ end
 local function verify(id)
     if not fs.exists("verified/" .. tostring(id)) then
         local f = fs.open("verified/" .. tostring(id), "w")
-        f.write("{}")
+        f.write("{accessLevel = 1}")
         f.close()
     end
 end

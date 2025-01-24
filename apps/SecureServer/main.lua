@@ -62,7 +62,7 @@ while true do
     for i = 2,#parts do
         table.insert(args, parts[i])
     end
-    if commands[command] and tData.accessLevel >= commands[commands][1] then
+    if commands[command] and tData.accessLevel >= commands[command][1] then
         commands[command][2](id, table.unpack(args))
     else
         log(id, nil, "Invalid command given or terminal is unauthorized!")

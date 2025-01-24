@@ -26,13 +26,22 @@ while true do
     for word in msg:gmatch("[^%s]+") do
         table.insert(parts, word)
     end
-    if parts[1] == "verifself" then
-        if tonumber(parts[2]) == id then
+    local command = parts[1]
+    if command == "verifself" then
+        local requestId = parts[2]
+        if tonumber(requestId) == id then
             verify(id)
             log(id, nil, "Terminal " .. id .. " self verified succesfully.")
             rednet.send(id, "verifconfirm " .. os.getComputerID())
         else
             log(id, nil, "Terminal attempted to verify but had an invalid signature.")
+        end
+    elseif command == "call" then
+        if fs.exists("verified/" .. id) then
+            log(id, nil, "Terminal online.")
+            rednet.send(id, "here")
+        else
+            log(id, nil, "Unverified terminal attempted to connect.")
         end
     end
 end

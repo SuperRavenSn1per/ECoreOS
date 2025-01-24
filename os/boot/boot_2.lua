@@ -20,9 +20,9 @@ gui.setPos(1,3)
 addStatus("Welcome to ECoreOS! Booting now...", "u")
 addStatus("Checking for required peripherals...", "u")
 if konfig.get("host_id") >= 0 then
+    addStatus("Host is required but no modem is. Setting modem to required, change HOST_ID to less than 0 if a host is not required.", "w")
     konfig.require("modem")
 end
-addStatus("Host is required but no modem is. Setting modem to required, change HOST_ID to less than 0 if a host is not required.", "w")
 if #konfig.getRequired() == 0 then
     addStatus("No peripherals required!", "s")
 else

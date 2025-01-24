@@ -16,14 +16,6 @@ local function log(id, label, txt)
     end
 end
 
-local function verify(id)
-    if not fs.exists("verified/" .. tostring(id)) then
-        local f = fs.open("verified/" .. tostring(id), "w")
-        f.write("{accessLevel = 1}")
-        f.close()
-    end
-end
-
 local function fetchData(id)
     if fs.exists("verified/" .. tostring(id)) then
         local f = fs.open("verified/" .. tostring(id), "r")
@@ -44,6 +36,12 @@ local function changeData(id, data, newValue)
             f.write(textutils.serialise(tData))
             f.close()
         end
+    end
+end
+
+local function verify(id)
+    if not fs.exists("verified/" .. tostring(id)) then
+        changeData(id, "accessLevel", 1)
     end
 end
 

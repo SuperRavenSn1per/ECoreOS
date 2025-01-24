@@ -1,6 +1,5 @@
 local gui = require("/apis/ecore_gui")
 local konfig = require("/apis/konfig")
-local net = require("/apis/ecore_net")
 
 gui.setPrimary(term.current())
 
@@ -36,17 +35,17 @@ else
     addStatus("All required peripherals are present!", "s")
 end
 if peripheral.find("modem") then
-    addStatus("Opening network on modem...", "u")
-    net.open()
-    addStatus("Network is opened!", "s")
+    addStatus("Opening Rednet on modem...", "u")
+    rednet.open()
+    addStatus("Rednet is opened!", "s")
 end
 addStatus("Checking if host is required...", "u")
 if konfig.get("host_id") < 0 then
     addStatus("No host is required!", "s")
 else
     addStatus("Host is required. Pinging...", "u")
-    net.send(konfig.get("host_id"), "call")
-    local id, msg = net.receive(5)
+    rednet.send(konfig.get("host_id"), "call")
+    local id, msg = rednet.receive(5)
     if not id or id ~= konfig.get("host_id") or msg ~= "here" then
         addStatus("Host did not respond.", "e")
     else

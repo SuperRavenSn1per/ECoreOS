@@ -62,9 +62,6 @@ local function enter()
         elseif id == konfig.get("host_id") and msg == "locked" then
             konfig.set("locked", true)
             drawInputBar(colors.orange, "LOCKED")
-            sleep(5)
-            input = {}
-            drawInputBar()
         elseif id == nil then
             os.reboot()
         else

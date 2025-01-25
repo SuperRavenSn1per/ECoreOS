@@ -81,6 +81,7 @@ local commands = {
         if fs.exists("verified/" .. id) then
             if newType == "keypad" or newType == "monitor" or newType == "alarm" or newType == "elevator" then
                 log(id, "Changed type to '" .. newType .. "'")
+                changeData("type", newType)
 
                 return "success"
             else

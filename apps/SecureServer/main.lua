@@ -166,9 +166,9 @@ local commands = {
             for i,verif in pairs(fs.list("verified/")) do
                 rednet.send(tonumber(verif), "lock")
                 log(id, "Lockdown initiated!")
-
-                return "success"
             end
+
+            return "success"
         else
             if fs.exists("verified/" .. newId) then
                 rednet.send(tonumber(newId), "lock")
@@ -185,9 +185,9 @@ local commands = {
             for i,verif in pairs(fs.list("verified/")) do
                 rednet.send(tonumber(verif), "unlock")
                 log(id, "Lockdown ended!")
-
-                return "success"
             end
+
+            return "success"
         else
             if fs.exists("verified/" .. newId) then
                 rednet.send(tonumber(newId), "unlock")

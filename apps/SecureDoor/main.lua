@@ -1,8 +1,6 @@
 local gui = require("/apis/ecore_gui")
 local konfig = require("/apis/konfig")
 
-local password = "1271"
-
 gui.setPrimary(peripheral.find("monitor"))
 
 local input = {}
@@ -52,9 +50,9 @@ end
 local function enter()
     if konfig.get("locked") == false then
         input = table.concat(input)
-        rednet.send(konfig.get("host_id"), "pass " .. input)
+        rednet.send(konfig.get("host_id"), "passwd " .. input)
         local id, msg = rednet.receive(5)
-        if id == konfig.get("host_id") and msg == "correct" then
+        if id == konfig.get("host_id") and msg == "success" then
             drawInputBar(colors.green, "CORRECT")
             parallel.waitForAll(onCorrect, function()  
                 sleep(5)

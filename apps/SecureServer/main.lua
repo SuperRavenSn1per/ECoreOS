@@ -164,7 +164,7 @@ local commands = {
     ["lock"] = {2, function(id, newId)
         if newId == "all" then
             for i,verif in pairs(fs.list("verified/")) do
-                local tData = fetchData(id)
+                local tData = fetchData(verif)
                 if tData.type == "keypad" then
                     rednet.send(tonumber(verif), "lock")
                 end
@@ -186,7 +186,7 @@ local commands = {
     ["unlock"] = {2, function(id, newId)
         if newId == "all" then
             for i,verif in pairs(fs.list("verified/")) do
-                local tData = fetchData(id)
+                local tData = fetchData(verif)
                 if tData.type == "keypad" then
                     rednet.send(tonumber(verif), "unlock")
                 end

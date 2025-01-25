@@ -65,7 +65,6 @@ local commands = {
         end
     end},
     ["call"] = {1, function(id)
-        local tData = fetchData(id)
         if fs.exists("verified/" .. id) then
             log(id, "Terminal online.")
 
@@ -77,12 +76,14 @@ local commands = {
         end
     end},
     ["changetype"] = {1, function(id, newType)
-        local tData = fetchData(id)
         if fs.exists("verified/" .. id) then
             if newType == "keypad" or newType == "monitor" or newType == "alarm" or newType == "elevator" then
                 log(id, "Changed type to '" .. newType .. "'")
                 changeData(id, "type", newType)
-
+                if newType == "keypad" and not tData.password then
+                    changeData(id, "password", "0000")
+                end
+                    
                 return "success"
             else
                 log(id, "Invalid type '" .. newType .. "'")

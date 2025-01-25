@@ -57,7 +57,7 @@ local commands = {
             verify(id)
             log(id, "Terminal " .. id .. " self verified succesfully.")
                 
-            return "verifconfirm " .. os.getComputerID())
+            return "verifconfirm " .. os.getComputerID()
         else
             log(id, "Terminal attempted to verify but had an invalid signature.")
 

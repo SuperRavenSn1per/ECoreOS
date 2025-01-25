@@ -76,7 +76,7 @@ local commands = {
         end
     end},
     ["changetype"] = {1, function(id, newType)
-        local tData = fetchData(id)§
+        local tData = fetchData(id)
         if fs.exists("verified/" .. id) then
             if newType == "keypad" or newType == "monitor" or newType == "alarm" or newType == "elevator" then
                 log(id, "Changed type to '" .. newType .. "'")

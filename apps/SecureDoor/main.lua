@@ -105,6 +105,7 @@ if konfig.get("registered") ~= true then
     rednet.send(konfig.get("host_id"), "changetype keypad")
     local id,msg = rednet.receive()
     if id == konfig.get("host_id") and msg == "success" then
+        konfig.set("registered", true)
     else
         gui.clear()
         gui.writeLine(1, "Error registering terminal.")

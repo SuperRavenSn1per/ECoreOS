@@ -6,16 +6,6 @@ gui.setPrimary(term.current())
 gui.clear(colors.black)
 gui.title("EBM Secure Server v1.0", colors.orange)
 
-local function log(id, label, txt)
-    gui.printFormatted({"(", colors.gray}, {tostring(id) .. " ", colors.lightGray}, {"| ", colors.gray}, {label and label or "unlabeled", colors.lightGray}, {") ", colors.gray}, txt)
-    local x, y = gui.getPos()
-    if y >= gui.h - 1 then
-        gui.title("EBM Secure Server v1.0", colors.orange)
-        gui.clearLine(2)
-        gui.setPos(x,y)
-    end
-end
-
 local function fetchData(id)
     if fs.exists("verified/" .. tostring(id)) then
         local f = fs.open("verified/" .. tostring(id), "r")
@@ -25,6 +15,17 @@ local function fetchData(id)
     end
 
     return {accessLevel = 0}
+end
+
+local function log(id, txt)
+    local tData = fetchData(id)
+    gui.printFormatted({"(", colors.gray}, {tostring(id) .. " ", colors.lightGray}, {"| ", colors.gray}, {tData.label or "unlabeled", colors.lightGray}, {") ", colors.gray}, txt)
+    local x, y = gui.getPos()
+    if y >= gui.h - 1 then
+        gui.title("EBM Secure Server v1.0", colors.orange)
+        gui.clearLine(2)
+        gui.setPos(x,y)
+    end
 end
 
 local function changeData(id, data, newValue)
@@ -54,30 +55,47 @@ local commands = {
     ["verifself"] = {0, function(id, requestId)
         if tonumber(requestId) == id then
             verify(id)
-            log(id, nil, "Terminal " .. id .. " self verified succesfully.")
+            log(id, "Terminal " .. id .. " self verified succesfully.")
             rednet.send(id, "verifconfirm " .. os.getComputerID())
         else
-            log(id, nil, "Terminal attempted to verify but had an invalid signature.")
+            log(id, "Terminal attempted to verify but had an invalid signature.")
 
             return -1
         end
     end},
     ["call"] = {1, function(id)
+        local tData = fetchData(id)
         if fs.exists("verified/" .. id) then
-            log(id, nil, "Terminal online.")
+            log(id, "Terminal online.")
             rednet.send(id, "here")
         else
-            log(id, nil, "Unverified terminal attempted to connect.")
+            log(id, "Unverified terminal attempted to connect.")
             
+            return -1
+        end
+    end},
+    ["changetype"] = {1, function(id, newType)
+        local tData = fetchData(id)
+        if fs.exists("verified/" .. id) then
+            if newType == "keypad" or newType == "monitor" or newType == "alarm" or newType == "elevator" then
+                log(id, "Changed type to '" .. newType .. "'")
+            else
+                log(id, "Invalid type '" .. newType .. "'")
+
+                return -1
+            end
+        else
+            log(id, "Unauthorized terminal attempted to change label."  
+
             return -1
         end
     end},
     ["passwd"] = {1, function(id, password)
         local tData = fetchData(id)
         if tData.password == password then
-            log(id, tData.label, "Correct password entered.")
+            log(id, "Correct password entered.")
         else
-            log(id, tData.label, "Incorrect password entered.")
+            log(id, "Incorrect password entered.")
 
             return -1
         end
@@ -105,6 +123,6 @@ while true do
             rednet.send(id, "success")
         end
     else
-        log(id, nil, "Invalid command given or terminal is unauthorized!")
+        log(id, "Invalid command given or terminal is unauthorized!")
     end
 end

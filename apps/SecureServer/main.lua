@@ -41,10 +41,10 @@ end
 
 local function verify(id)
     if not fs.exists("verified/" .. tostring(id)) then
-        local f = fs.open("verified/" .. tostring(id), "w")
-        f.write("{}")
-        f.close()
-        changeData(id, "accessLevel", 1)
+      local f = fs.open("verified/" .. tostring(id), "w")
+      f.write("{}")
+      f.close()
+      changeData(id, "accessLevel", 1)
     end
 end
 
@@ -56,6 +56,8 @@ local commands = {
             rednet.send(id, "verifconfirm " .. os.getComputerID())
         else
             log(id, nil, "Terminal attempted to verify but had an invalid signature.")
+
+            return -1
         end
     end},
     ["call"] = {1, function(id)
@@ -64,6 +66,8 @@ local commands = {
             rednet.send(id, "here")
         else
             log(id, nil, "Unverified terminal attempted to connect.")
+            
+            return -1
         end
     end}
 }
@@ -82,7 +86,12 @@ while true do
         table.insert(args, parts[i])
     end
     if commands[command] and tData.accessLevel >= commands[command][1] then
-        commands[command][2](id, table.unpack(args))
+        local ok, response = pcall(function() commands[command][2](id, table.unpack(args)) end)
+        if not ok or response == -1 then
+            rednet.send(id, "fail")
+        else
+            rednet.send(id, "success")
+        end
     else
         log(id, nil, "Invalid command given or terminal is unauthorized!")
     end

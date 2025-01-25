@@ -3,6 +3,19 @@ local konfig = require("/apis/konfig")
 
 gui.setPrimary(term.current())
 
+gui.clear()
+if not konfig.get("registered") then
+    rednet.send(konfig.get("host_id"), "controlverif")
+    local id,msg = rednet.receive()
+    if id == konfig.get("host_id") and msg == "controlconfirm" then
+        konfig.set("registered", true)
+    else
+        gui.writeLine(1, "Error registering device")
+        sleep(3)
+        os.reboot()
+    end
+end
+
 gui.clear(colors.black)
 gui.title("EBM Secure Controller v1.0", colors.gray)
 

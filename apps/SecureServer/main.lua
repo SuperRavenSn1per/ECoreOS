@@ -45,6 +45,8 @@ local function verify(id)
       f.write("{}")
       f.close()
       changeData(id, "accessLevel", 1)
+      changeData(id, "type", "unspecified")
+      changeData(id, "label", "unlabeled")
     end
 end
 
@@ -69,6 +71,16 @@ local commands = {
             
             return -1
         end
+    end},
+    ["passwd"] = {1, function(id, password)
+        local tData = fetchData(id)
+        if tData.password == password then
+            log(id, tData.label, "Correct password entered.")
+        else
+            log(id, tData.label, "Incorrect password entered.")
+
+            return -1
+        end
     end}
 }
 
@@ -86,7 +98,7 @@ while true do
         table.insert(args, parts[i])
     end
     if commands[command] and tData.accessLevel >= commands[command][1] then
-        local ok, response = pcall(function() commands[command][2](id, table.unpack(args)) end)
+        local ok, response = pcall(function() local r = commands[command][2](id, table.unpack(args)) return r end)
         if not ok or response == -1 then
             rednet.send(id, "fail")
         else

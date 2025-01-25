@@ -124,6 +124,39 @@ local commands = {
             return -1, "Denied."
         end
     end},
+    ["verify"] = {2, function(id, newId)
+        verify(newId)
+        log(id, "Verified new terminal " .. newId)
+
+        return "success"
+    end},
+    ["unverify"] = {2, function(id, delId)
+        if fs.exists("verified/" .. delId then
+            fs.delete("verified/" .. delId)
+
+            return "success"
+        else
+            return -1, "Terminal does not exist."    
+        end
+    end},
+    ["label"] = {2, function(id, newId, newLabel)
+        if fs.exists("verified/" .. newId then
+            changeData(newId, "label", newLabel)
+
+            return "success"
+        else
+            return -1, "Terminal does not exist."    
+        end
+    end},
+    ["changepass"] = {2, function(id, newId, newPass)
+        if fs.exists("verified/" .. newId then
+            changeData(newId, "password", newPass)
+
+            return "success"
+        else
+            return -1, "Terminal does not exist."    
+        end
+    end}
 }
 
 gui.setPos(1, 3)

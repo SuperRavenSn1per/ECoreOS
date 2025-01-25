@@ -52,7 +52,7 @@ local function enter()
         input = table.concat(input)
         rednet.send(konfig.get("host_id"), "passwd " .. input)
         local id, msg = rednet.receive(5)
-        if id == konfig.get("host_id") and msg == "success" then
+        if id == konfig.get("host_id") and msg == "correct" then
             drawInputBar(colors.green, "CORRECT")
             parallel.waitForAll(onCorrect, function()  
                 sleep(5)

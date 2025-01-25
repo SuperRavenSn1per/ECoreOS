@@ -85,7 +85,7 @@ local commands = {
                 return -1
             end
         else
-            log(id, "Unauthorized terminal attempted to change label."  
+            log(id, "Unauthorized terminal attempted to change label.")  
 
             return -1
         end

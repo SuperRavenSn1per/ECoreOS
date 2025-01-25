@@ -56,22 +56,24 @@ local commands = {
         if tonumber(requestId) == id then
             verify(id)
             log(id, "Terminal " .. id .. " self verified succesfully.")
-            rednet.send(id, "verifconfirm " .. os.getComputerID())
+                
+            return "verifconfirm " .. os.getComputerID())
         else
             log(id, "Terminal attempted to verify but had an invalid signature.")
 
-            return -1
+            return -1, "Invalid signature."
         end
     end},
     ["call"] = {1, function(id)
         local tData = fetchData(id)
         if fs.exists("verified/" .. id) then
             log(id, "Terminal online.")
-            rednet.send(id, "here")
+
+            return "here"
         else
             log(id, "Unverified terminal attempted to connect.")
             
-            return -1
+            return -1, "Unverified."
         end
     end},
     ["changetype"] = {1, function(id, newType)
@@ -79,25 +81,29 @@ local commands = {
         if fs.exists("verified/" .. id) then
             if newType == "keypad" or newType == "monitor" or newType == "alarm" or newType == "elevator" then
                 log(id, "Changed type to '" .. newType .. "'")
+
+                return "success"
             else
                 log(id, "Invalid type '" .. newType .. "'")
 
-                return -1
+                return -1, "Invalid type."
             end
         else
             log(id, "Unauthorized terminal attempted to change label.")  
 
-            return -1
+            return -1, "Unauthorized."
         end
     end},
     ["passwd"] = {1, function(id, password)
         local tData = fetchData(id)
         if tData.password == password then
             log(id, "Correct password entered.")
+
+            return "correct"
         else
             log(id, "Incorrect password entered.")
 
-            return -1
+            return -1, "Incorrect."
         end
     end}
 }
@@ -116,11 +122,11 @@ while true do
         table.insert(args, parts[i])
     end
     if commands[command] and tData.accessLevel >= commands[command][1] then
-        local ok, response = pcall(function() local r = commands[command][2](id, table.unpack(args)) return r end)
+        local ok, response, reason = pcall(function() local r = commands[command][2](id, table.unpack(args)) return r end)
         if not ok or response == -1 then
-            rednet.send(id, "fail")
+            rednet.send(id, "Error: " .. reason)
         else
-            rednet.send(id, "success")
+            rednet.send(id, response)
         end
     else
         log(id, "Invalid command given or terminal is unauthorized!")

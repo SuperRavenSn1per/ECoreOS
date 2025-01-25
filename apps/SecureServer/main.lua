@@ -133,6 +133,7 @@ local commands = {
     ["unverify"] = {2, function(id, delId)
         if fs.exists("verified/" .. delId) then
             fs.delete("verified/" .. delId)
+            log(id, "Terminal " .. delId .. " has been unverified.")
 
             return "success"
         else
@@ -142,6 +143,7 @@ local commands = {
     ["label"] = {2, function(id, newId, newLabel)
         if fs.exists("verified/" .. newId) then
             changeData(newId, "label", newLabel)
+            log(id, "Changed label of " .. newId .. " to '" .. newLabel .. "'") 
 
             return "success"
         else
@@ -151,6 +153,7 @@ local commands = {
     ["changepass"] = {2, function(id, newId, newPass)
         if fs.exists("verified/" .. newId) then
             changeData(newId, "password", newPass)
+            log(id, "Changed password of terminal " .. newId)
 
             return "success"
         else
@@ -175,11 +178,12 @@ while true do
     if commands[command] and tData.accessLevel >= commands[command][1] then
         local ok, response, reason = pcall(function() local r,r2 = commands[command][2](id, table.unpack(args)) return r,r2 end)
         if not ok or response == -1 then
-            rednet.send(id, "Error: " .. reason)
+            rednet.send(id, reason)
         else
             rednet.send(id, response)
         end
     else
         log(id, "Invalid command given or terminal is unauthorized!")
+        rednet.send(id, "Invalid command or unknown error!")
     end
 end

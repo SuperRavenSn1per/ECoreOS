@@ -131,7 +131,7 @@ local commands = {
         return "success"
     end},
     ["unverify"] = {2, function(id, delId)
-        if fs.exists("verified/" .. delId then
+        if fs.exists("verified/" .. delId) then
             fs.delete("verified/" .. delId)
 
             return "success"
@@ -140,7 +140,7 @@ local commands = {
         end
     end},
     ["label"] = {2, function(id, newId, newLabel)
-        if fs.exists("verified/" .. newId then
+        if fs.exists("verified/" .. newId) then
             changeData(newId, "label", newLabel)
 
             return "success"
@@ -149,7 +149,7 @@ local commands = {
         end
     end},
     ["changepass"] = {2, function(id, newId, newPass)
-        if fs.exists("verified/" .. newId then
+        if fs.exists("verified/" .. newId) then
             changeData(newId, "password", newPass)
 
             return "success"

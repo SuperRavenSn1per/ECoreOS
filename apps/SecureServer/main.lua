@@ -122,7 +122,7 @@ while true do
         table.insert(args, parts[i])
     end
     if commands[command] and tData.accessLevel >= commands[command][1] then
-        local ok, response, reason = pcall(function() local r = commands[command][2](id, table.unpack(args)) return r end)
+        local ok, response, reason = pcall(function() local r,r2 = commands[command][2](id, table.unpack(args)) return r,r2 end)
         if not ok or response == -1 then
             rednet.send(id, "Error: " .. reason)
         else

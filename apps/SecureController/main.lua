@@ -10,7 +10,7 @@ if not konfig.get("registered") then
     if id == konfig.get("host_id") and msg == "controlconfirm" then
         konfig.set("registered", true)
     else
-        gui.writeLine(1, "Error registering device")
+        gui.writeLine(1, "Error registering terminal")
         sleep(3)
         os.reboot()
     end

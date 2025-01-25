@@ -83,6 +83,7 @@ local commands = {
                 changeData(id, "type", newType)
                 if newType == "keypad" and not tData.password then
                     changeData(id, "password", "0000")
+                    changeData(id, "locked", false)
                 end
                     
                 return "success"
@@ -99,10 +100,14 @@ local commands = {
     end},
     ["passwd"] = {1, function(id, password)
         local tData = fetchData(id)
-        if tData.password == password then
+        if tData.password == password and tData.type == "keypad" and tData.locked ~= true then
             log(id, "Correct password entered.")
 
             return "correct"
+        elseif tData.locked == true then
+            log(id, "Terminal is locked.")
+
+            return -1, "Locked"
         else
             log(id, "Incorrect password entered.")
 
@@ -166,6 +171,7 @@ local commands = {
             for i,verif in pairs(fs.list("verified/")) do
                 local tData = fetchData(verif)
                 if tData.type == "keypad" then
+                    changeData(verif, "locked", true)
                     rednet.send(tonumber(verif), "lock")
                 end
             end
@@ -175,6 +181,7 @@ local commands = {
         else
             if fs.exists("verified/" .. newId) then
                 rednet.send(tonumber(newId), "lock")
+                changeData(newId, "locked", true)
                 log(id, "Terminal " .. newId .. " has been locked.")
 
                 return "success"
@@ -188,6 +195,7 @@ local commands = {
             for i,verif in pairs(fs.list("verified/")) do
                 local tData = fetchData(verif)
                 if tData.type == "keypad" then
+                    changeData(verif, "locked", false)
                     rednet.send(tonumber(verif), "unlock")
                 end
             end
@@ -197,6 +205,7 @@ local commands = {
         else
             if fs.exists("verified/" .. newId) then
                 rednet.send(tonumber(newId), "unlock")
+                changeData(newId, "locked", false)
                 log(id, "Terminal " .. newId .. " has been unlocked.")
 
                 return "success"

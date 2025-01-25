@@ -164,9 +164,12 @@ local commands = {
     ["lock"] = {2, function(id, newId)
         if newId == "all" then
             for i,verif in pairs(fs.list("verified/")) do
-                rednet.send(tonumber(verif), "lock")
-                log(id, "Lockdown initiated!")
+                local tData = fetchData(id)
+                if tData.type == "keypad" then
+                    rednet.send(tonumber(verif), "lock")
+                end
             end
+            log(id, "Lockdown initiated!")
 
             return "success"
         else
@@ -183,9 +186,12 @@ local commands = {
     ["unlock"] = {2, function(id, newId)
         if newId == "all" then
             for i,verif in pairs(fs.list("verified/")) do
-                rednet.send(tonumber(verif), "unlock")
-                log(id, "Lockdown ended!")
+                local tData = fetchData(id)
+                if tData.type == "keypad" then
+                    rednet.send(tonumber(verif), "unlock")
+                end
             end
+            log(id, "Lockdown ended!")
 
             return "success"
         else

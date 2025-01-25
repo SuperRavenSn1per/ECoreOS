@@ -107,7 +107,23 @@ local commands = {
 
             return -1, "Incorrect."
         end
-    end}
+    end},
+    ["controlverif"] = {1, function(id)
+        log(id, "Terminal wants to register as a controller. Allow it? (Y/n)")
+        local input = read()
+        if input:lower() == "y" then
+            log(id, "Denied.")
+
+            return -1, "Denied."
+        else
+            log(id, "Terminal is now a controller.")
+            changeData(id, "accessLevel", 2)
+            changeData(id, "label", "controller_" .. tostring(id))
+            changeData(id, "type", "controller")
+                
+            return "controlconfirm"
+        end
+    end},
 }
 
 gui.setPos(1, 3)

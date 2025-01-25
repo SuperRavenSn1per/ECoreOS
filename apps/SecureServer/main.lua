@@ -159,6 +159,44 @@ local commands = {
         else
             return -1, "Terminal does not exist."    
         end
+    end},
+    ["lock"] = {2, function(id, newId)
+        if newId == "all" then
+            for i,verif in pairs(fs.list("verified/")) do
+                rednet.send(tonumber(verif), "lock")
+                log(id, "Lockdown initiated!")
+
+                return "success"
+            end
+        else
+            if fs.exists("verified/" .. newId) then
+                rednet.send(tonumber(newId), "lock")
+                log(id, "Terminal " .. newId .. " has been locked.")
+
+                return "success"
+            else
+                return -1, "Terminal does not exist."
+            end
+        end
+    end},
+    ["unlock"] = {2, function(id, newId)
+        if newId == "all" then
+            for i,verif in pairs(fs.list("verified/")) do
+                rednet.send(tonumber(verif), "unlock")
+                log(id, "Lockdown ended!")
+
+                return "success"
+            end
+        else
+            if fs.exists("verified/" .. newId) then
+                rednet.send(tonumber(newId), "unlock")
+                log(id, "Terminal " .. newId .. " has been unlocked.")
+
+                return "success"
+            else
+                return -1, "Terminal does not exist."
+            end
+        end
     end}
 }
 

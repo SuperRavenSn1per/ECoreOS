@@ -101,6 +101,18 @@ gui.buttons.add("zero", "0", 7, 10, buttonColor, buttonHl, addInput, "0")
 gui.buttons.add("confirm", ">", 11, 10, colors.green, colors.lime, enter)
 gui.buttons.add("backspace", "x", 3, 10, colors.red, colors.orange, backspace)
 
+if konfig.get("registered") ~= true then
+    rednet.send(konfig.get("host_id"), "changetype keypad")
+    local id,msg = rednet.receive()
+    if id == konfig.get("host_id") and msg == "success" then
+    else
+        gui.clear()
+        gui.writeLine(1, "Error registering terminal.")
+        sleep(3)
+        os.reboot()
+    end
+end
+
 gui.clear()
 drawInputBar(konfig.get("locked") == true and colors.orange or nil, konfig.get("locked") == true and "LOCKED" or nil)
 

@@ -13,6 +13,19 @@ local function addStatus(txt, statusType)
     end
 end
 
+local function generateRegKey()
+    local seed = math.random(100,999)
+    local length = tonumber(tostring(seed):len())
+    local P1 = seed * 5
+    local P2 = P1 / 3
+
+    local key = length .. seed .. P1 .. P2
+    key = math.floor(key)
+    key = tostring(key):sub(1,6)
+
+    return key
+end
+
 gui.clear()
 gui.title(_G.name .. " v" .. _G.version .. " - Booting...", colors.blue)
 
@@ -67,6 +80,18 @@ else
         end
     else
         addStatus("Host responded.", "s")
+    end
+end
+if konfig.get("type") ~= "nil" and konfig.get("register_key") == "nil" then
+    addStatus("This device is unregistered. Attempting to register...", "u")
+    local regKey = generateRegKey()
+    rednet.send(konfig.get("host_id"), "regself " .. konfig.get("type") .. "_" .. regKey)
+    local id,msg = rednet.receive(5)
+    if id == konfig.get("host_id") and msg == "regsuccess" then
+        addStatus("Registration successfull!", "s")
+        konfig.set("register_key", regKey)
+    else
+        addStatus("Registration failed!", "e")
     end
 end
 addStatus("Boot process complete.", "s")

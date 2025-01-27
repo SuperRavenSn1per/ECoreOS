@@ -163,7 +163,8 @@ local commands = {
     ["unverify"] = {2, function(id, delId)
         if fs.exists("verified/" .. delId) then
             fs.delete("verified/" .. delId)
-
+            log(id, "Terminal " .. delId .. " has been unverified.")
+            
             return "success"
         else
             return -1, "Terminal does not exist."    
@@ -172,6 +173,7 @@ local commands = {
     ["label"] = {2, function(id, newId, newLabel)
         if fs.exists("verified/" .. newId) then
             changeData(newId, "label", newLabel)
+            log(id, "Changed label of " .. newId .. " to '" .. newLabel .. "'")
 
             return "success"
         else
@@ -181,6 +183,7 @@ local commands = {
     ["changepass"] = {2, function(id, newId, newPass)
         if fs.exists("verified/" .. newId) then
             changeData(newId, "password", newPass)
+            log(id, "Changed password of terminal " .. newId)
 
             return "success"
         else

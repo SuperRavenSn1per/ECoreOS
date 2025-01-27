@@ -153,7 +153,7 @@ local commands = {
             if tData.locked == true then
                 log(id, "Terminal is locked.")
 
-                return -1, "lock"
+                return -1, "locked"
             else
                 log(id, "Incorrect password entered.")
 

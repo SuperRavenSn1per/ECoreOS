@@ -212,7 +212,7 @@ local commands = {
         else
             if fs.exists("verified/" .. newId) then
                 rednet.send(tonumber(newId), "lock")
-                changeData(id, "locked", true)
+                changeData(newId, "locked", true)
                 log(id, "Terminal " .. newId .. " has been locked.")
 
                 return "success"
@@ -237,7 +237,7 @@ local commands = {
             if fs.exists("verified/" .. newId) then
                 rednet.send(tonumber(newId), "unlock")
                 log(id, "Terminal " .. newId .. " has been unlocked.")
-                changeData(id, "locked", false)
+                changeData(newId, "locked", false)
 
                 return "success"
             else

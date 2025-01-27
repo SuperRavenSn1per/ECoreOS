@@ -80,6 +80,7 @@ local function register(id, regType, regKey)
     if fs.exists("verified/" .. tostring(id)) then
         changeData(id, "type", regType)
         changeData(id, "reg_key", regKey)
+        changeData(id, "accessLevel", regTypes[regType])
     end
 end
 

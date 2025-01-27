@@ -6,10 +6,18 @@ gui.setPrimary(term.current())
 gui.clear(colors.black)
 gui.title("EBM Secure Server v1.0", colors.orange)
 
-local function fetchData(id)
+local regTypes = {
+    ["keypad"] = 1,
+    ["controller"] = 2
+}
+
+local function fetchData(id, dataName)
     if fs.exists("verified/" .. tostring(id)) then
         local f = fs.open("verified/" .. tostring(id), "r")
         local data = textutils.unserialise(f.readAll())
+        if dataName then
+            data = data[dataName]
+        end
 
         return data
     end
@@ -25,6 +33,22 @@ local function log(id, txt)
         gui.title("EBM Secure Server v1.0", colors.orange)
         gui.clearLine(2)
         gui.setPos(x,y)
+    end
+end
+
+local function verifyRegKey(key)
+    local length = key:sub(1,1)
+    local seed = key:sub(2, 1 + length)
+    local P1 = seed * 5
+    local P2 = P1 / 3
+    local final = length .. seed .. P1 .. P2
+    final = math.floor(final)
+    final = tostring(final):sub(1,6)
+
+    if final == key then
+        return true
+    else
+        return false
     end
 end
 
@@ -48,6 +72,14 @@ local function verify(id)
       changeData(id, "accessLevel", 1)
       changeData(id, "type", "unspecified")
       changeData(id, "label", "unlabeled")
+      changeData(id, "reg_key", nil)
+    end
+end
+
+local function register(id, regType, regKey)
+    if fs.exists("verified/" .. tostring(id)) then
+        changeData(id, "type", regType)
+        changeData(id, "reg_key", regKey)
     end
 end
 
@@ -64,6 +96,40 @@ local commands = {
             return -1, "Invalid signature."
         end
     end},
+    ["regself"] = {1, function(id, reg)
+        local parts = {}
+
+        for part in reg:gmatch("[^_]+") do
+            table.insert(parts, part)
+        end
+
+        local regType = parts[1]
+        local regKey = parts[2]
+    
+        if not regType or not regKey then
+            log(id, "Terminal tried to self-register with invalid format.")
+            return -1,"Invalid message format."
+        end
+        if not regTypes[regType] then
+            log(id, "Terminal tried to self-register with invalid registration type.")
+            return -1,"Invalid registration type."
+        end
+        if not verifyRegKey(regKey) then
+            log(id, "Terminal tried to self-register with invalid registration key.")
+            return -1,"Invalid registration key."
+        end
+        if regType == "controller" then
+            log(id, "Terminal is attempting to self-register as a controller. Allow it?")
+            local input = read()
+            if input:lower() ~= "y" and input:lower() ~= "yes" then
+                log(id, "Denied.")
+                return -1,"Denied by operator."
+            end
+        end
+        register(id, regType, regKey)
+        log(id, "Successfully self-registered as '" .. regType .. "'")
+        return "regsuccess"
+    end},
     ["call"] = {1, function(id)
         if fs.exists("verified/" .. id) then
             log(id, "Terminal online.")
@@ -75,59 +141,16 @@ local commands = {
             return -1, "Unverified."
         end
     end},
-    ["changetype"] = {1, function(id, newType)
-        local tData = fetchData(id)
-        if fs.exists("verified/" .. id) then
-            if newType == "keypad" or newType == "monitor" or newType == "alarm" or newType == "elevator" then
-                log(id, "Changed type to '" .. newType .. "'")
-                changeData(id, "type", newType)
-                if newType == "keypad" and not tData.password then
-                    changeData(id, "password", "0000")
-                    changeData(id, "locked", false)
-                end
-                    
-                return "success"
-            else
-                log(id, "Invalid type '" .. newType .. "'")
-
-                return -1, "Invalid type."
-            end
-        else
-            log(id, "Unauthorized terminal attempted to change label.")  
-
-            return -1, "Unauthorized."
-        end
-    end},
     ["passwd"] = {1, function(id, password)
         local tData = fetchData(id)
-        if tData.password == password and tData.type == "keypad" and tData.locked ~= true then
+        if tData.password == password then
             log(id, "Correct password entered.")
 
             return "correct"
-        elseif tData.locked == true then
-            log(id, "Terminal is locked.")
-
-            return -1, "Locked"
         else
             log(id, "Incorrect password entered.")
 
             return -1, "Incorrect."
-        end
-    end},
-    ["controlverif"] = {1, function(id)
-        log(id, "Terminal wants to register as a controller. Allow it? (Y/n)")
-        local input = read()
-        if input:lower() == "y" then
-            log(id, "Terminal is now a controller.")
-            changeData(id, "accessLevel", 2)
-            changeData(id, "label", "controller_" .. tostring(id))
-            changeData(id, "type", "controller")
-                
-            return "controlconfirm"
-        else
-            log(id, "Denied.")
-
-            return -1, "Denied."
         end
     end},
     ["verify"] = {2, function(id, newId)
@@ -139,7 +162,6 @@ local commands = {
     ["unverify"] = {2, function(id, delId)
         if fs.exists("verified/" .. delId) then
             fs.delete("verified/" .. delId)
-            log(id, "Terminal " .. delId .. " has been unverified.")
 
             return "success"
         else
@@ -149,7 +171,6 @@ local commands = {
     ["label"] = {2, function(id, newId, newLabel)
         if fs.exists("verified/" .. newId) then
             changeData(newId, "label", newLabel)
-            log(id, "Changed label of " .. newId .. " to '" .. newLabel .. "'") 
 
             return "success"
         else
@@ -159,59 +180,10 @@ local commands = {
     ["changepass"] = {2, function(id, newId, newPass)
         if fs.exists("verified/" .. newId) then
             changeData(newId, "password", newPass)
-            log(id, "Changed password of terminal " .. newId)
 
             return "success"
         else
             return -1, "Terminal does not exist."    
-        end
-    end},
-    ["lock"] = {2, function(id, newId)
-        if newId == "all" then
-            for i,verif in pairs(fs.list("verified/")) do
-                local tData = fetchData(verif)
-                if tData.type == "keypad" then
-                    changeData(verif, "locked", true)
-                    rednet.send(tonumber(verif), "lock")
-                end
-            end
-            log(id, "Lockdown initiated!")
-
-            return "success"
-        else
-            if fs.exists("verified/" .. newId) then
-                rednet.send(tonumber(newId), "lock")
-                changeData(newId, "locked", true)
-                log(id, "Terminal " .. newId .. " has been locked.")
-
-                return "success"
-            else
-                return -1, "Terminal does not exist."
-            end
-        end
-    end},
-    ["unlock"] = {2, function(id, newId)
-        if newId == "all" then
-            for i,verif in pairs(fs.list("verified/")) do
-                local tData = fetchData(verif)
-                if tData.type == "keypad" then
-                    changeData(verif, "locked", false)
-                    rednet.send(tonumber(verif), "unlock")
-                end
-            end
-            log(id, "Lockdown ended!")
-
-            return "success"
-        else
-            if fs.exists("verified/" .. newId) then
-                rednet.send(tonumber(newId), "unlock")
-                changeData(newId, "locked", false)
-                log(id, "Terminal " .. newId .. " has been unlocked.")
-
-                return "success"
-            else
-                return -1, "Terminal does not exist."
-            end
         end
     end}
 }
@@ -232,12 +204,11 @@ while true do
     if commands[command] and tData.accessLevel >= commands[command][1] then
         local ok, response, reason = pcall(function() local r,r2 = commands[command][2](id, table.unpack(args)) return r,r2 end)
         if not ok or response == -1 then
-            rednet.send(id, reason)
+            rednet.send(id, "Error: " .. (reason or response))
         else
             rednet.send(id, response)
         end
     else
         log(id, "Invalid command given or terminal is unauthorized!")
-        rednet.send(id, "Invalid command or unknown error!")
     end
 end

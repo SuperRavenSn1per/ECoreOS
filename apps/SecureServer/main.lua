@@ -73,6 +73,7 @@ local function verify(id)
       changeData(id, "type", "unspecified")
       changeData(id, "label", "unlabeled")
       changeData(id, "reg_key", nil)
+      changeData(id, "locked", false)
     end
 end
 
@@ -144,14 +145,20 @@ local commands = {
     end},
     ["passwd"] = {1, function(id, password)
         local tData = fetchData(id)
-        if tData.password == password then
+        if tData.password == password and tData.locked == false then
             log(id, "Correct password entered.")
 
             return "correct"
         else
-            log(id, "Incorrect password entered.")
+            if tData.locked == true then
+                log(id, "Terminal is locked.")
 
-            return -1, "Incorrect."
+                return -1, "lock"
+            else
+                log(id, "Incorrect password entered.")
+
+                return -1, "Incorrect."
+            end
         end
     end},
     ["verify"] = {2, function(id, newId)
@@ -196,6 +203,7 @@ local commands = {
                 local tData = fetchData(verif)
                 if tData.type == "keypad" then
                     rednet.send(tonumber(verif), "lock")
+                    changeData(verif, "locked", true)
                 end
             end
             log(id, "Lockdown initiated!")
@@ -204,6 +212,7 @@ local commands = {
         else
             if fs.exists("verified/" .. newId) then
                 rednet.send(tonumber(newId), "lock")
+                changeData(id, "locked", true)
                 log(id, "Terminal " .. newId .. " has been locked.")
 
                 return "success"
@@ -218,6 +227,7 @@ local commands = {
                 local tData = fetchData(verif)
                 if tData.type == "keypad" then
                     rednet.send(tonumber(verif), "unlock")
+                    changeData(verif, "locked", false)
                 end
             end
             log(id, "Lockdown ended!")
@@ -227,6 +237,7 @@ local commands = {
             if fs.exists("verified/" .. newId) then
                 rednet.send(tonumber(newId), "unlock")
                 log(id, "Terminal " .. newId .. " has been unlocked.")
+                changeData(id, "locked", false)
 
                 return "success"
             else

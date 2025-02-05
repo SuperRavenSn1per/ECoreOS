@@ -18,7 +18,7 @@ local function countdown()
         print("BOOTING IN " .. t .. "...")
         sleep(1)
         t = t - 1
-    until t == 0
+    until t <= 0
 
     boot = "/boot/boot_2.lua"
 

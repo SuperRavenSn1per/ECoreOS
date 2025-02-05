@@ -1,4 +1,4 @@
-local url = "https://raw.githubusercontent.com/SuperRavenSn1per/ECoreOS/refs/heads/main/os/"
+local url = "https://raw.githubusercontent.com/SuperRavenSn1per/ECoreOS/refs/heads/experimental/os/"
 
 local function install(file, fileName)
     local dat = http.get(url .. file).readAll()
@@ -30,6 +30,7 @@ while true do
         konfig.set("require_login", false)
         konfig.set("type", "nil")
         konfig.set("register_key", "nil")
+        konfig.set("boot_time", 10)
         print("Installation complete! Rebooting...")
         sleep(3)
         os.reboot()

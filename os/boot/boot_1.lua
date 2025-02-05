@@ -58,7 +58,7 @@ term.setCursorPos(1,1)
 print("OS: " .. _G.name)
 print("VERSION: " .. _G.version)
 print("TERMINAL ID: " .. os.getComputerID())
-print("REGKEY: " .. konfig.get("register_key")
+print("REGKEY: " .. konfig.get("register_key"))
 
 drawSelection(currentIndex)
 

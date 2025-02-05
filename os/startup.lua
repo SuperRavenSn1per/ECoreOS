@@ -11,7 +11,6 @@ if konfig.get("require_login") == true then
     print("Login Page\n")
     write("Username > ")
     local username = read()
-    print("")
     write("Password > ")
     local password = read()
 else

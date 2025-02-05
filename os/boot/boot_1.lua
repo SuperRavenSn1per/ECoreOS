@@ -16,7 +16,7 @@ local function drawSelection(index)
         if i == index then
             print(string.upper("[ " .. selection[1] .. " ]"))
         else
-            print(string.upper(selection[1] .. "     "))
+            print(string.upper("  " .. selection[1] .. "     "))
         end
     end
 end

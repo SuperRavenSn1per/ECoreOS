@@ -1,152 +1,273 @@
 local gui = require("/apis/ecore_gui")
 local konfig = require("/apis/konfig")
-local net = require("/apis/ecore_net")
 
 gui.setPrimary(term.current())
 
 gui.clear(colors.black)
 gui.title("EBM Secure Server v1.0", colors.orange)
 
-local function log(id, label, txt)
-    gui.printFormatted({"(", colors.gray}, {tostring(id) .. " ", colors.lightGray}, {"| ", colors.gray}, {label, colors.lightGray}, {") ", colors.gray}, txt)
+local regTypes = {
+    ["keypad"] = 1,
+    ["controller"] = 2
+}
+
+local function fetchData(id, dataName)
+    if fs.exists("verified/" .. tostring(id)) then
+        local f = fs.open("verified/" .. tostring(id), "r")
+        local data = textutils.unserialise(f.readAll())
+        if dataName then
+            data = data[dataName]
+        end
+
+        return data
+    end
+
+    return {accessLevel = 0}
 end
 
-local function changeData(terminal, value, newValue)
-    local f = fs.open("/verified/" .. terminal, "r")
-    local data = f.readAll()
-    local fData = textutils.unserialise(data)
-    f.close()
-    fData[value] = newValue
-    local f = fs.open("/verified/" .. terminal, "w")
-    f.write(textutils.serialise(fData))
-    f.close()
+local function log(id, txt)
+    local tData = fetchData(id)
+    gui.printFormatted({"(", colors.gray}, {tostring(id) .. " ", colors.lightGray}, {"| ", colors.gray}, {tData.label or "unlabeled", colors.lightGray}, {") ", colors.gray}, txt)
+    local x, y = gui.getPos()
+    if y >= gui.h - 1 then
+        gui.title("EBM Secure Server v1.0", colors.orange)
+        gui.clearLine(2)
+        gui.setPos(x,y)
+    end
+end
+
+local function verifyRegKey(key)
+    local length = key:sub(1,1)
+    local seed = key:sub(2, 1 + length)
+    local P1 = seed * 5
+    local P2 = P1 / 3
+    local final = length .. seed .. P1 .. P2
+    final = math.floor(final)
+    final = tostring(final):sub(1,6)
+
+    if final == key then
+        return true
+    else
+        return false
+    end
+end
+
+local function changeData(id, data, newValue)
+    if fs.exists("verified/" .. tostring(id)) then
+        local tData = fetchData(id)
+        if tData then
+            tData[data] = newValue
+            local f = fs.open("verified/" .. tostring(id), "w")
+            f.write(textutils.serialise(tData))
+            f.close()
+        end
+    end
+end
+
+local function verify(id)
+    if not fs.exists("verified/" .. tostring(id)) then
+      local f = fs.open("verified/" .. tostring(id), "w")
+      f.write("{}")
+      f.close()
+      changeData(id, "accessLevel", 1)
+      changeData(id, "type", "unspecified")
+      changeData(id, "label", "unlabeled")
+      changeData(id, "reg_key", nil)
+      changeData(id, "locked", false)
+    end
+end
+
+local function register(id, regType, regKey)
+    if fs.exists("verified/" .. tostring(id)) then
+        changeData(id, "type", regType)
+        changeData(id, "reg_key", regKey)
+        changeData(id, "accessLevel", regTypes[regType])
+    end
 end
 
 local commands = {
-    ["verify"] = function(sender, id)
-        if not fs.exists("/verified/" .. id) then
-            local f = fs.open("/verified/" .. id, "w")
-            local default = {}
-            default.label = "unlabeled"
-            default.password = "0000"
-            default.locked = false
-            f.write(textutils.serialise(default))
-            f.close()
-            net.send(sender, "success")
-            log(sender, "control", "Terminal " .. id .. " has been verified.")
+    ["verifself"] = {0, function(id, requestId)
+        if tonumber(requestId) == id then
+            verify(id)
+            log(id, "Terminal " .. id .. " self verified succesfully.")
+                
+            return "verifconfirm " .. os.getComputerID()
         else
-            net.send(sender, "Terminal already verified!")
-            log(sender, "control", "Terminal " .. id .. " already verified!")
+            log(id, "Terminal attempted to verify but had an invalid signature.")
+
+            return -1, "Invalid signature."
         end
-    end,
-    ["delete"] = function(sender, id)
-        if fs.exists("/verified/" .. id) then
-            fs.delete("/verified/" .. id)
-            net.send(sender, "success")
-            log(sender, "control", "Terminal " .. id .. " has been deleted.")
-        else
-            net.send(sender, "Terminal does not exist!")
-            log(sender, "control", "Terminal " .. id .. " does not exist!")
+    end},
+    ["regself"] = {1, function(id, reg)
+        local parts = {}
+
+        for part in reg:gmatch("[^_]+") do
+            table.insert(parts, part)
         end
-    end,
-    ["label"] = function(sender, id, label)
-        if fs.exists("/verified/" .. id) then
-            changeData(id, "label", label)
-            net.send(sender, "success")
-            log(sender, "control", "Terminal " .. id .. " has been labeled.")
-        else
-            net.send(sender, "Terminal does not exist!")
-            log(sender, "control", "Terminal " .. id .. " does not exist!")
+
+        local regType = parts[1]
+        local regKey = parts[2]
+    
+        if not regType or not regKey then
+            log(id, "Terminal tried to self-register with invalid format.")
+            return -1,"Invalid message format."
         end
-    end,
-    ["changepass"] = function(sender, id, newpass)
-        if fs.exists("/verified/" .. id) then
-            changeData(id, "password", newpass)
-            net.send(sender, "success")
-            log(sender, "control", "Terminal " .. id .. " password changed.")
-        else
-            net.send(sender, "Terminal does not exist!")
-            log(sender, "control", "Terminal " .. id .. " does not exist!")
+        if not regTypes[regType] then
+            log(id, "Terminal tried to self-register with invalid registration type.")
+            return -1,"Invalid registration type."
         end
-    end,
-    ["lock"] = function(sender, id)
-        if id == "all" then
-            for i,terminal in pairs(fs.list("/verified/")) do
-                changeData(terminal, "locked", true)
-                net.send(tonumber(terminal), "lock")
-                net.send(sender, "success")
+        if not verifyRegKey(regKey) then
+            log(id, "Terminal tried to self-register with invalid registration key.")
+            return -1,"Invalid registration key."
+        end
+        if regType == "controller" then
+            log(id, "Terminal is attempting to self-register as a controller. Allow it?")
+            local input = read()
+            if input:lower() ~= "y" and input:lower() ~= "yes" then
+                log(id, "Denied.")
+                return -1,"Denied by operator."
             end
-            log(sender, "control", "Lockdown initiated!")
+        end
+        register(id, regType, regKey)
+        log(id, "Successfully self-registered as '" .. regType .. "'")
+        return "regsuccess"
+    end},
+    ["call"] = {1, function(id)
+        if fs.exists("verified/" .. id) then
+            log(id, "Terminal online.")
+
+            return "here"
         else
-            if fs.exists("/verified/" .. id) then
-                changeData(id, "locked", true)
-                net.send(tonumber(id), "lock")
-                net.send(sender, "success")
-                log(sender, "control", "Terminal " .. id .. " has been locked.")
+            log(id, "Unverified terminal attempted to connect.")
+            
+            return -1, "Unverified."
+        end
+    end},
+    ["passwd"] = {1, function(id, password)
+        local tData = fetchData(id)
+        if tData.password == password and tData.locked == false then
+            log(id, "Correct password entered.")
+
+            return "correct"
+        else
+            if tData.locked == true then
+                log(id, "Terminal is locked.")
+
+                return "locked"
             else
-                net.send(sender, "Terminal does not exist!")
-                log(sender, "control", "Terminal " .. id .. " does not exist!")
+                log(id, "Incorrect password entered.")
+
+                return "incorrect"
             end
         end
-    end,
-    ["unlock"] = function(sender, id)
-        if id == "all" then
-            for i,terminal in pairs(fs.list("/verified/")) do
-                changeData(terminal, "locked", false)
-                net.send(tonumber(terminal), "unlock")
-                net.send(sender, "success")
-            end
-            log(sender, "control", "Lockdown ended!")
+    end},
+    ["verify"] = {2, function(id, newId)
+        verify(newId)
+        log(id, "Verified new terminal " .. newId)
+
+        return "success"
+    end},
+    ["unverify"] = {2, function(id, delId)
+        if fs.exists("verified/" .. delId) then
+            fs.delete("verified/" .. delId)
+            log(id, "Terminal " .. delId .. " has been unverified.")
+            
+            return "success"
         else
-            if fs.exists("/verified/" .. id) then
-                changeData(id, "locked", false)
-                net.send(tonumber(id), "unlock")
-                net.send(sender, "success")
-                log(sender, "control", "Terminal " .. id .. " has been unlocked.")
+            return -1, "Terminal does not exist."    
+        end
+    end},
+    ["label"] = {2, function(id, newId, newLabel)
+        if fs.exists("verified/" .. newId) then
+            changeData(newId, "label", newLabel)
+            log(id, "Changed label of " .. newId .. " to '" .. newLabel .. "'")
+
+            return "success"
+        else
+            return -1, "Terminal does not exist."    
+        end
+    end},
+    ["changepass"] = {2, function(id, newId, newPass)
+        if fs.exists("verified/" .. newId) then
+            changeData(newId, "password", newPass)
+            log(id, "Changed password of terminal " .. newId)
+
+            return "success"
+        else
+            return -1, "Terminal does not exist."    
+        end
+    end},
+    ["lock"] = {2, function(id, newId)
+        if newId == "all" then
+            for i,verif in pairs(fs.list("verified/")) do
+                local tData = fetchData(verif)
+                if tData.type == "keypad" then
+                    rednet.send(tonumber(verif), "lock")
+                    changeData(verif, "locked", true)
+                end
+            end
+            log(id, "Lockdown initiated!")
+
+            return "success"
+        else
+            if fs.exists("verified/" .. newId) then
+                rednet.send(tonumber(newId), "lock")
+                changeData(newId, "locked", true)
+                log(id, "Terminal " .. newId .. " has been locked.")
+
+                return "success"
             else
-                net.send(sender, "Terminal does not exist!")
-                log(sender, "control", "Terminal " .. id .. " does not exist!")
+                return -1, "Terminal does not exist."
             end
         end
-    end,
+    end},
+    ["unlock"] = {2, function(id, newId)
+        if newId == "all" then
+            for i,verif in pairs(fs.list("verified/")) do
+                local tData = fetchData(verif)
+                if tData.type == "keypad" then
+                    rednet.send(tonumber(verif), "unlock")
+                    changeData(verif, "locked", false)
+                end
+            end
+            log(id, "Lockdown ended!")
+
+            return "success"
+        else
+            if fs.exists("verified/" .. newId) then
+                rednet.send(tonumber(newId), "unlock")
+                log(id, "Terminal " .. newId .. " has been unlocked.")
+                changeData(newId, "locked", false)
+
+                return "success"
+            else
+                return -1, "Terminal does not exist."
+            end
+        end
+    end}
 }
 
-if not fs.exists("/verified") then
-    fs.makeDir("/verified")
-end
-
 gui.setPos(1, 3)
-
 while true do
-    id, msg = net.receive()
+    local id, msg = rednet.receive()
+    local tData = fetchData(id)
+    local parts = {}
+    for word in msg:gmatch("[^%s]+") do
+        table.insert(parts, word)
+    end
+    local command = parts[1]
     local args = {}
-    for string in msg:gmatch("[^%s]+") do
-        table.insert(args, string)
+    for i = 2,#parts do
+        table.insert(args, parts[i])
     end
-    if msg == "call" then
-        net.send(id, "here")
-    end
-    if fs.exists("/verified/".. tostring(id)) then
-        local f = fs.open("/verified/" .. tostring(id), "r")
-        local data = f.readAll()
-        local tData = textutils.unserialise(data)
-        if args[1]:lower() == "pass" then
-            if args[2] == tData.password and tData.locked == false then
-                net.send(id, "correct")
-                log(id, tData.label, "Correct password entered.")
-            elseif tData.locked == true then
-                net.send(id, "locked")
-                log(id, tData.label, "Denied. Terminal is locked.")
-            else
-                net.send(id, "incorrect")
-                log(id, tData.label, "Incorrect password entered.")
-            end
+    if commands[command] and tData.accessLevel >= commands[command][1] then
+        local ok, response, reason = pcall(function() local r,r2 = commands[command][2](id, table.unpack(args)) return r,r2 end)
+        if not ok or response == -1 then
+            rednet.send(id, "Error: " .. (reason or response))
+        else
+            rednet.send(id, response)
         end
-    elseif id == konfig.get("controller_id") then
-        local ok, err = pcall(function() commands[args[1]](id, args[2], args[3]) end)
-        if not ok then
-            net.send(id, "Unknown error or command not valid!")
-            log(id, "control", "Error: " .. err)
-        end
+    else
+        log(id, "Invalid command given or terminal is unauthorized!")
     end
 end

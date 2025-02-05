@@ -1,8 +1,6 @@
 local gui = require("/apis/ecore_gui")
 local konfig = require("/apis/konfig")
 
-local password = "1271"
-
 gui.setPrimary(peripheral.find("monitor"))
 
 local input = {}
@@ -52,7 +50,7 @@ end
 local function enter()
     if konfig.get("locked") == false then
         input = table.concat(input)
-        rednet.send(konfig.get("host_id"), "pass " .. input)
+        rednet.send(konfig.get("host_id"), "passwd " .. input)
         local id, msg = rednet.receive(5)
         if id == konfig.get("host_id") and msg == "correct" then
             drawInputBar(colors.green, "CORRECT")
@@ -64,9 +62,6 @@ local function enter()
         elseif id == konfig.get("host_id") and msg == "locked" then
             konfig.set("locked", true)
             drawInputBar(colors.orange, "LOCKED")
-            sleep(5)
-            input = {}
-            drawInputBar()
         elseif id == nil then
             os.reboot()
         else

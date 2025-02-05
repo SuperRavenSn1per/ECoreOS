@@ -3,7 +3,8 @@
   default_config = {
     {name = "hide_passcode", value = false},
     {name = "host_id", value = 0},
-    {name = "locked", value = false}
+    {name = "locked", value = false},
+    {name = "type", value = "keypad"}
   },
   required = {"modem", "monitor"}
 }

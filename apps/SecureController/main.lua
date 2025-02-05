@@ -3,12 +3,14 @@ local konfig = require("/apis/konfig")
 
 gui.setPrimary(term.current())
 
+gui.clear()
+
 gui.clear(colors.black)
 gui.title("EBM Secure Controller v1.0", colors.gray)
 
 gui.writeLine(3, "Commands:")
 gui.writeFormatted(4, {"verify [id] - ", colors.lightGray}, "Verifies a keypad.")
-gui.writeFormatted(5, {"delete [id] - ", colors.lightGray}, "Deletes a keypad.")
+gui.writeFormatted(5, {"unverify [id] - ", colors.lightGray}, "Deletes a keypad.")
 gui.writeFormatted(6, {"label [id] [label] - ", colors.lightGray}, "Change or add label to keypad.")
 gui.writeFormatted(7, {"changepass [id] [newpass] - ", colors.lightGray}, "Change keypad password.")
 gui.writeFormatted(8, {"lock [id/all] - ", colors.lightGray}, "Lock a keypad.")

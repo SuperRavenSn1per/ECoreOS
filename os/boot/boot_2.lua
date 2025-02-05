@@ -1,6 +1,5 @@
 local gui = require("/apis/ecore_gui")
 local konfig = require("/apis/konfig")
-local net = require("/apis/ecore_net")
 
 gui.setPrimary(term.current())
 
@@ -14,6 +13,19 @@ local function addStatus(txt, statusType)
     end
 end
 
+local function generateRegKey()
+    local seed = math.random(100,999)
+    local length = tonumber(tostring(seed):len())
+    local P1 = seed * 5
+    local P2 = P1 / 3
+
+    local key = length .. seed .. P1 .. P2
+    key = math.floor(key)
+    key = tostring(key):sub(1,6)
+
+    return key
+end
+
 gui.clear()
 gui.title(_G.name .. " v" .. _G.version .. " - Booting...", colors.blue)
 
@@ -21,6 +33,7 @@ gui.setPos(1,3)
 addStatus("Welcome to ECoreOS! Booting now...", "u")
 addStatus("Checking for required peripherals...", "u")
 if konfig.get("host_id") >= 0 then
+    addStatus("Host is required but no modem is. Setting modem to required, change HOST_ID to less than 0 if a host is not required.", "w")
     konfig.require("modem")
 end
 if #konfig.getRequired() == 0 then
@@ -36,21 +49,49 @@ else
     addStatus("All required peripherals are present!", "s")
 end
 if peripheral.find("modem") then
-    addStatus("Opening network on modem...", "u")
-    net.open()
-    addStatus("Network is opened!", "s")
+    addStatus("Opening Rednet on modem...", "u")
+    peripheral.find("modem", rednet.open)
+    addStatus("Rednet is opened!", "s")
 end
 addStatus("Checking if host is required...", "u")
 if konfig.get("host_id") < 0 then
     addStatus("No host is required!", "s")
 else
     addStatus("Host is required. Pinging...", "u")
-    net.send(konfig.get("host_id"), "call")
-    local id, msg = net.receive(5)
+    rednet.send(konfig.get("host_id"), "call")
+    local id, msg = rednet.receive(3)
     if not id or id ~= konfig.get("host_id") or msg ~= "here" then
-        addStatus("Host did not respond.", "e")
+        addStatus("Host did not respond. Trying to verify a new host...", "w")
+        rednet.broadcast("verifself " .. os.getComputerID())
+        local id, msg = rednet.receive(3)
+        local parts = {}
+        local newHost
+        if msg then
+            for word in msg:gmatch("[^%s]+") do
+                table.insert(parts, word)
+            end
+            newHost = parts[2]
+        end
+        if not id or parts[1] ~= "verifconfirm" then
+            addStatus("No valid host was found. Please set up host and try again.", "e")
+        else
+            addStatus("A valid host responded. Setting " .. newHost .. " as host ID.", "s")
+            konfig.set("host_id", tonumber(newHost))
+        end
     else
         addStatus("Host responded.", "s")
+    end
+end
+if konfig.get("type") ~= "nil" and konfig.get("register_key") == "nil" then
+    addStatus("This device is unregistered. Attempting to register...", "u")
+    local regKey = generateRegKey()
+    rednet.send(konfig.get("host_id"), "regself " .. konfig.get("type") .. "_" .. regKey)
+    local id,msg = rednet.receive(5)
+    if id == konfig.get("host_id") and msg == "regsuccess" then
+        addStatus("Registration successfull!", "s")
+        konfig.set("register_key", regKey)
+    else
+        addStatus("Registration failed!", "e")
     end
 end
 addStatus("Boot process complete.", "s")

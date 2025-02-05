@@ -10,19 +10,8 @@ local selections = {
     {"App Installer", "/boot/installer.lua"}
 }
 
-local function countdown()
-    local t = 5
-    repeat
-        gui.writeLine(5 + #selections + 1, "Booting OS in " .. tostring(t) .. "...")
-        sleep(1)
-        t = t - 1
-    until t == 0
-    boot = "/boot/boot_2.lua"
-
-    return
-end
-
 local function drawSelection(index)
+    term.setCursorPos(1,6)
     for i,selection in pairs(selections) do
         if i == index then
             print(string.upper("[ " .. selection[1] .. " ]"))
@@ -68,7 +57,8 @@ term.clear()
 term.setCursorPos(1,1)
 print("OS: " .. _G.name)
 print("VERSION: " .. _G.version)
-print("")
+print("TERMINAL ID: " .. os.getComputerID())
+print("REGKEY: " .. konfig.get("register_key")
 
 drawSelection(currentIndex)
 

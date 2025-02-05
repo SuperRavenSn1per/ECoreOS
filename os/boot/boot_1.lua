@@ -1,7 +1,4 @@
-local gui = require("/apis/ecore_gui")
 local konfig = require("/apis/konfig")
-
-gui.setPrimary(term.current())
 
 local boot = ""
 
@@ -26,13 +23,12 @@ local function countdown()
 end
 
 local function drawSelection(index)
-    gui.setPos(1, 5)
     for i,selection in pairs(selections) do
         if i == index then
-            gui.setBG(colors.gray)
+            print(string.upper("[ " .. selection[1] .. " ]"))
+        else
+            print(string.upper(selection[1])
         end
-        gui.printFormatted({i .. ". ", colors.lightGray}, selection[1] .. " ")
-        gui.setBG(gui.bgColor)
     end
 end
 
@@ -67,9 +63,13 @@ local function makeSelection()
     end
 end
 
-gui.clear()
-gui.title(_G.name .. " v" .. _G.version .. " - Boot Menu", colors.blue)
-gui.writeLine(3, "Make a selection below:")
+term.setBackgroundColor(colors.blue)
+term.clear()
+term.setCursorPos(1,1)
+print(string.upper("OS: " .. _G.name))
+print(string.upper("VERSION: " .. _G.version))
+print("")
+
 drawSelection(currentIndex)
 
 parallel.waitForAny(countdown, makeSelection)

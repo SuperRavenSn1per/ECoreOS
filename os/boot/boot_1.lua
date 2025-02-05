@@ -11,7 +11,7 @@ local selections = {
 }
 
 local function countdown()
-    local t = 10
+    local t = konfig.get("boot_time")
 
     repeat
         term.setCursorPos(1, 6 + #selections + 1)

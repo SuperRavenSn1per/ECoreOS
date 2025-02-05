@@ -6,7 +6,7 @@ local currentIndex = 1
 
 local selections = {
     {"Boot OS", "/boot/boot_2.lua"},
-    {"Configuration", "/boot/configuration.lua"},
+    {"Edit Configuration", "/boot/configuration.lua"},
     {"App Installer", "/boot/installer.lua"}
 }
 

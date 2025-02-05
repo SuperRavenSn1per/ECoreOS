@@ -10,6 +10,17 @@ local selections = {
     {"App Installer", "/boot/installer.lua"}
 }
 
+local function countdown()
+    local t = 10
+
+    repeat
+        term.setCursorPos(1, 6 + #selections + 1)
+        print("BOOTING IN " .. t .. "...")
+        sleep(1)
+        t = t - 1
+    until t == 0
+end
+
 local function drawSelection(index)
     term.setCursorPos(1,6)
     for i,selection in pairs(selections) do

@@ -7,7 +7,7 @@ if konfig.get("require_login") == true then
     term.setBackgroundColor(colors.red)
     term.clear()
     term.setCursorPos(1,1)
-    print(os_name .. " v" .. os_version)
+    print(_G.os_name .. " v" .. _G.os_version)
     print("Login Page\n")
     write("Username > ")
     local username = read()

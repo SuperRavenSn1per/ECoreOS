@@ -27,7 +27,7 @@ local function drawSelection(index)
         if i == index then
             print(string.upper("[ " .. selection[1] .. " ]"))
         else
-            print(string.upper(selection[1])
+            print(string.upper(selection[1]))
         end
     end
 end
@@ -66,8 +66,8 @@ end
 term.setBackgroundColor(colors.blue)
 term.clear()
 term.setCursorPos(1,1)
-print(string.upper("OS: " .. _G.name))
-print(string.upper("VERSION: " .. _G.version))
+print("OS: " .. _G.name)
+print("VERSION: " .. _G.version)
 print("")
 
 drawSelection(currentIndex)

@@ -5,7 +5,7 @@ local selection = konfig.getRequired()[currentIndex]
 
 local function drawRequired()
     term.setCursorPos(1,6)
-    print("Current Selection: " .. selection.name .. "          ")
+    print("Current Selection: " .. p .. "          ")
     term.setCursorPos(1,8)
     for i,p in pairs(konfig.getRequired()) do
         if i == currentIndex then

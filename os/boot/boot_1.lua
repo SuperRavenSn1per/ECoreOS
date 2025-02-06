@@ -15,14 +15,16 @@ local selections = {
 }
 
 local function countdown()
-    local t = konfig.get("boot_time")
-
-    repeat
-        term.setCursorPos(1, 6 + #selections + 1)
-        print("BOOTING IN " .. t .. "...")
-        sleep(1)
-        t = t - 1
-    until t <= 0
+    if konfig.get("boot_time") > 0 then
+        local t = konfig.get("boot_time")
+    
+        repeat
+            term.setCursorPos(1, 6 + #selections + 1)
+            print("BOOTING IN " .. t .. "...")
+            sleep(1)
+            t = t - 1
+        until t <= 0
+    end
 
     boot = "/boot/boot_2.lua"
 

@@ -5,7 +5,7 @@ local selection
 
 local function drawConfig()
     term.setCursorPos(1,6)
-    print("Current Selection: " .. selection .. "          ")
+    print("Current Selection: " .. selection.name .. "          ")
     term.setCursorPos(1,8)
     for i,setting in pairs(konfig.getAll()) do
         if i == currentIndex then

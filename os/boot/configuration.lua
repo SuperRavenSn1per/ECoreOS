@@ -1,10 +1,11 @@
 local konfig = require("/apis/konfig")
 
 local currentIndex = 1
+local selection
 
 local function drawConfig()
     term.setCursorPos(1,6)
-    print("Current Selection: " .. konfig.getAll()[currentIndex].name .. "          ")
+    print("Current Selection: " .. selection .. "          ")
     term.setCursorPos(1,8)
     for i,setting in pairs(konfig.getAll()) do
         if i == currentIndex then
@@ -35,6 +36,27 @@ while true do
                 currentIndex = 1
             end
         end
+        selection = konfig.getAll()[currentIndex]
         drawConfig()
+    elseif event == "key" then
+        if key == 257 then -- on enter
+            term.setCursorPos(1, 8 + #konfig.getAll() + 1)
+            if type(selection.value) == "boolean" then
+                selection.value = not selection.value
+            else
+                local newValue = read()
+                if type(selection.value) == "number" then
+                    selection.value = tonumber(newValue) or 0
+                elseif type(selection.value) == "string" then
+                    selection.value = tostring(newValue)
+                end
+            end
+            term.setCursorPos(1, 8 + #konfig.getAll() + 1)
+            write("                       ")
+            drawConfig()
+        elseif key == 259 then -- on backspace
+            shell.run("/boot/boot_1.lua")
+            break
+        end
     end
 end

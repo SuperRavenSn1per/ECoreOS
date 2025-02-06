@@ -1,13 +1,13 @@
 local konfig = require("/apis/konfig")
 local gui = require("/apis/ecore_gui")
 
-gui.setPrimary(term.current())
+gui.setPrimary(term.current(), colors.blue)
 
 local currentIndex = 1
 local selection = konfig.getRequired()[currentIndex] or "nil"
 
 local function drawRequired()
-    gui.clearBox(7, gui.h, colors.blue)
+    gui.clearBox(7, gui.h)
     term.setCursorPos(1,7)
     print("Current Selection: " .. selection .. "          ")
     term.setCursorPos(1,9)

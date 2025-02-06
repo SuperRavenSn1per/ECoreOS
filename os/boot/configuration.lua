@@ -53,8 +53,9 @@ while true do
                     konfig.set(selection.name, tostring(newValue))
                 end
             end
-            selection = konfig.getAll()[currentIndex]
+            term.setCursorPos(1, 8 + #konfig.getAll() + 1)
             write("                       ")
+            selection = konfig.getAll()[currentIndex]
             drawConfig()
             
         elseif key == 259 then -- on backspace

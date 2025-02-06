@@ -45,13 +45,14 @@ while true do
         if key == 257 then -- on enter
             term.setCursorPos(1, 9 + #konfig.getRequired() + 1)
             local newRequired = read()
-            konfig.require(newRequired)
             term.setCursorPos(1, 9 + #konfig.getRequired() + 1)
             write("                       ")
+            konfig.require(newRequired)
             selection = konfig.getRequired()[currentIndex]
             drawRequired()
     elseif key == 261 then -- on del
             konfig.unrequire(selection)
+            term.setCursorPos(1, 9 + currentIndex)
             write("                       ")
             drawRequired()
     elseif key == 259 then -- on backspace

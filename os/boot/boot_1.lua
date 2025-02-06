@@ -1,4 +1,7 @@
 local konfig = require("/apis/konfig")
+local gui = require("/apis/ecore_gui")
+
+gui.setPrimary(term.current(), colors.blue)
 
 local boot = ""
 
@@ -27,12 +30,13 @@ local function countdown()
 end
 
 local function drawSelection(index)
+    gui.clearBox(6, gui.h)
     term.setCursorPos(1,6)
     for i,selection in pairs(selections) do
         if i == index then
             print(string.upper("[ " .. selection[1] .. " ]"))
         else
-            print(string.upper("  " .. selection[1] .. "     "))
+            print(string.upper("  " .. selection[1]))
         end
     end
 end

@@ -21,6 +21,7 @@ term.clear()
 term.setCursorPos(1,1)
 print("EDITING CONFIGURATION\n")
 print("Press [BACKSPACE] to exit or select a setting to edit below.")
+drawConfig()
 
 while true do
     local event, key = os.pullEvent()

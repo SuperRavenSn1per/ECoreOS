@@ -7,7 +7,7 @@ local currentIndex = 1
 local selection = konfig.getRequired()[currentIndex]
 
 local function drawRequired()
-    gui.clearBox(7, gui.h)
+    gui.clearBox(7, gui.h, colors.blue)
     term.setCursorPos(1,7)
     print("Current Selection: " .. selection .. "          ")
     term.setCursorPos(1,9)
@@ -54,6 +54,8 @@ while true do
             drawRequired()
     elseif key == 261 then -- on del
             konfig.unrequire(selection)
+            currentIndex = 1
+            selection = konfig.getRequired()[currentIndex]
             drawRequired()
     elseif key == 259 then -- on backspace
             shell.run("/boot/boot_1.lua")

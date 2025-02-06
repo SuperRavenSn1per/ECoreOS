@@ -45,6 +45,7 @@ while true do
             if type(selection.value) == "boolean" then
                 konfig.set(selection.name, not selection.value)
             else
+                term.setCursorPos(1, 8 + #konfig.getAll() + 1)
                 local newValue = read()
                 if type(selection.value) == "number" then
                     konfig.set(selection.name, tonumber(newValue) or 0)
@@ -52,9 +53,10 @@ while true do
                     konfig.set(selection.name, tostring(newValue))
                 end
             end
-            term.setCursorPos(1, 8 + #konfig.getAll() + 1)
+            selection = konfig.getAll()[currentIndex]
             write("                       ")
             drawConfig()
+            
         elseif key == 259 then -- on backspace
             shell.run("/boot/boot_1.lua")
             break

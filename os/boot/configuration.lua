@@ -4,11 +4,13 @@ local currentIndex = 1
 
 local function drawConfig()
     term.setCursorPos(1,6)
+    print("Current Selection: " .. konfig.getAll()[currentIndex])
+    term.setCursorPos(1,8)
     for i,setting in pairs(konfig.getAll()) do
         if i == currentIndex then
-            print("> " .. string.upper(setting.name) .. "     ")
+            print("> " .. string.upper(setting.name) .. ": " .. tostring(setting.value) .. "          ")
         else
-            print("  " .. string.upper(setting.name) .. "     ")
+            print("  " .. string.upper(setting.name) .. ": " .. tostring(setting.value) .. "          ")
         end
     end
 end

@@ -43,24 +43,17 @@ while true do
         drawRequired()
     elseif event == "key" then
         if key == 257 then -- on enter
-            term.setCursorPos(1, 8 + #konfig.getRequired() + 1)
-            if type(selection.value) == "boolean" then
-                konfig.set(selection.name, not selection.value)
-            else
-                term.setCursorPos(1, 8 + #konfig.getRequired() + 1)
-                local newValue = read()
-                if type(selection.value) == "number" then
-                    konfig.set(selection.name, tonumber(newValue) or 0)
-                elseif type(selection.value) == "string" then
-                    konfig.set(selection.name, tostring(newValue))
-                end
-            end
-            term.setCursorPos(1, 8 + #konfig.getRequired() + 1)
+            term.setCursorPos(1, 9 + #konfig.getRequired() + 1)
+            local newRequired = read()
+            konfig.require(newRequired)
+            term.setCursorPos(1, 9 + #konfig.getRequired() + 1)
             write("                       ")
             selection = konfig.getRequired()[currentIndex]
             drawRequired()
-            
-        elseif key == 259 then -- on backspace
+    elseif key == 261 then -- on del
+            konfig.unrequire(selection)
+            drawRequired()
+    elseif key == 259 then -- on backspace
             shell.run("/boot/boot_1.lua")
             break
         end

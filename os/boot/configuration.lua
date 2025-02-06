@@ -43,13 +43,13 @@ while true do
         if key == 257 then -- on enter
             term.setCursorPos(1, 8 + #konfig.getAll() + 1)
             if type(selection.value) == "boolean" then
-                selection.value = not selection.value
+                konfig.set(selection.name, not selection.value)
             else
                 local newValue = read()
                 if type(selection.value) == "number" then
-                    selection.value = tonumber(newValue) or 0
+                    konfig.set(selection.name, tonumber(newValue) or 0)
                 elseif type(selection.value) == "string" then
-                    selection.value = tostring(newValue)
+                    konfig.set(selection.name, tostring(newValue))
                 end
             end
             term.setCursorPos(1, 8 + #konfig.getAll() + 1)

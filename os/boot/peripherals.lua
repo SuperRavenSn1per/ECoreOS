@@ -52,6 +52,7 @@ while true do
             drawRequired()
     elseif key == 261 then -- on del
             konfig.unrequire(selection)
+            write("                       ")
             drawRequired()
     elseif key == 259 then -- on backspace
             shell.run("/boot/boot_1.lua")

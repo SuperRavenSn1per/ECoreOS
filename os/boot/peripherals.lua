@@ -4,9 +4,9 @@ local currentIndex = 1
 local selection = konfig.getRequired()[currentIndex]
 
 local function drawRequired()
-    term.setCursorPos(1,6)
+    term.setCursorPos(1,7)
     print("Current Selection: " .. selection .. "          ")
-    term.setCursorPos(1,8)
+    term.setCursorPos(1,9)
     for i,p in pairs(konfig.getRequired()) do
         if i == currentIndex then
             print("> " .. p .. "          ")

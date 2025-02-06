@@ -14,8 +14,8 @@ local function drawConfig()
 end
 
 term.setBackgroundColor(colors.blue)
-tern.clear()
-tern.setCursorPos(1,1)
+term.clear()
+term.setCursorPos(1,1)
 print("EDITING CONFIGURATION\n")
 print("Press [BACKSPACE] to exit or select a setting to edit below.")
 

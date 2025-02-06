@@ -30,7 +30,7 @@ local function countdown()
 end
 
 local function drawSelection(index)
-    gui.clearBox(6, gui.h)
+    gui.clearBox(6, 5 + #selections)
     term.setCursorPos(1,6)
     for i,selection in pairs(selections) do
         if i == index then

@@ -29,7 +29,7 @@ while true do
             end
         elseif key == "s" then
             currentIndex = currentIndex + 1
-            if currentIndex >= #konfig.getAll() then
+            if currentIndex > #konfig.getAll() then
                 currentIndex = 1
             end
         end

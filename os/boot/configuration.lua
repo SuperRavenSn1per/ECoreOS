@@ -1,17 +1,21 @@
 local konfig = require("/apis/konfig")
+local gui = require("/apis/ecore_gui")
+
+gui.setPrimary(term.current(), colors.blue)
 
 local currentIndex = 1
 local selection = konfig.getAll()[currentIndex]
 
 local function drawConfig()
+    gui.clearBox(6, gui.h)
     term.setCursorPos(1,6)
-    print("Current Selection: " .. selection.name .. "          ")
+    print("Current Selection: " .. selection.name)
     term.setCursorPos(1,8)
     for i,setting in pairs(konfig.getAll()) do
         if i == currentIndex then
-            print("> " .. string.upper(setting.name) .. ": " .. tostring(setting.value) .. "          ")
+            print("> " .. string.upper(setting.name) .. ": " .. tostring(setting.value))
         else
-            print("  " .. string.upper(setting.name) .. ": " .. tostring(setting.value) .. "          ")
+            print("  " .. string.upper(setting.name) .. ": " .. tostring(setting.value))
         end
     end
 end
@@ -53,11 +57,8 @@ while true do
                     konfig.set(selection.name, tostring(newValue))
                 end
             end
-            term.setCursorPos(1, 8 + #konfig.getAll() + 1)
-            write("                       ")
             selection = konfig.getAll()[currentIndex]
             drawConfig()
-            
         elseif key == 259 then -- on backspace
             shell.run("/boot/boot_1.lua")
             break

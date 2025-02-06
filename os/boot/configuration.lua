@@ -4,7 +4,7 @@ local currentIndex = 1
 
 local function drawConfig()
     term.setCursorPos(1,6)
-    print("Current Selection: " .. konfig.getAll()[currentIndex].name .. "     ")
+    print("Current Selection: " .. konfig.getAll()[currentIndex].name .. "          ")
     term.setCursorPos(1,8)
     for i,setting in pairs(konfig.getAll()) do
         if i == currentIndex then

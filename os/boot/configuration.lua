@@ -1,7 +1,7 @@
 local konfig = require("/apis/konfig")
 
 local currentIndex = 1
-local selection
+local selection = konfig.getAll()[currentIndex]
 
 local function drawConfig()
     term.setCursorPos(1,6)

@@ -4,7 +4,7 @@ local gui = require("/apis/ecore_gui")
 gui.setPrimary(term.current())
 
 local currentIndex = 1
-local selection = konfig.getRequired()[currentIndex]
+local selection = konfig.getRequired()[currentIndex] or "nil"
 
 local function drawRequired()
     gui.clearBox(7, gui.h, colors.blue)
@@ -43,19 +43,19 @@ while true do
                 currentIndex = 1
             end
         end
-        selection = konfig.getRequired()[currentIndex]
+        selection = konfig.getRequired()[currentIndex] or "nil"
         drawRequired()
     elseif event == "key" then
         if key == 257 then -- on enter
             term.setCursorPos(1, 9 + #konfig.getRequired() + 1)
             local newRequired = read()
             konfig.require(newRequired)
-            selection = konfig.getRequired()[currentIndex]
+            selection = konfig.getRequired()[currentIndex] or "nil"
             drawRequired()
     elseif key == 261 then -- on del
             konfig.unrequire(selection)
             currentIndex = 1
-            selection = konfig.getRequired()[currentIndex]
+            selection = konfig.getRequired()[currentIndex] or "nil"
             drawRequired()
     elseif key == 259 then -- on backspace
             shell.run("/boot/boot_1.lua")

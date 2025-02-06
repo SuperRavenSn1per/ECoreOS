@@ -9,13 +9,13 @@ local selection = konfig.getRequired()[currentIndex] or "nil"
 local function drawRequired()
     gui.clearBox(7, gui.h)
     term.setCursorPos(1,7)
-    print("Current Selection: " .. selection .. "          ")
+    print("Current Selection: " .. selection)
     term.setCursorPos(1,9)
     for i,p in pairs(konfig.getRequired()) do
         if i == currentIndex then
-            print("> " .. p .. "          ")
+            print("> " .. p)
         else
-            print("  " .. p .. "          ")
+            print("  " .. p)
         end
     end
 end

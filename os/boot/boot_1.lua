@@ -1,5 +1,5 @@
-local konfig = require("/apis/konfig")
-local gui = require("/apis/ecore_gui")
+local config = require("/apis/ec_config")
+local gui = require("/apis/ec_gui")
 
 gui.setPrimary(term.current(), colors.blue)
 
@@ -15,8 +15,8 @@ local selections = {
 }
 
 local function countdown()
-    if konfig.get("boot_time") > 0 then
-        local t = konfig.get("boot_time")
+    if config.get("boot_time") > 0 then
+        local t = config.get("boot_time")
     
         repeat
             term.setCursorPos(1, 6 + #selections + 1)
@@ -80,7 +80,7 @@ term.setCursorPos(1,1)
 print("OS: " .. _G.name)
 print("VERSION: " .. _G.version)
 print("TERMINAL ID: " .. os.getComputerID())
-print("REGKEY: " .. konfig.get("register_key"))
+print("REGKEY: " .. config.get("register_key"))
 
 drawSelection(currentIndex)
 

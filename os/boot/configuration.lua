@@ -1,17 +1,17 @@
-local konfig = require("/apis/konfig")
-local gui = require("/apis/ecore_gui")
+local config = require("/apis/ec_config")
+local gui = require("/apis/ec_gui")
 
 gui.setPrimary(term.current(), colors.blue)
 
 local currentIndex = 1
-local selection = konfig.getAll()[currentIndex]
+local selection = config.getAll()[currentIndex]
 
 local function drawConfig()
     gui.clearBox(6, gui.h)
     term.setCursorPos(1,6)
     print("Current Selection: " .. selection.name)
     term.setCursorPos(1,8)
-    for i,setting in pairs(konfig.getAll()) do
+    for i,setting in pairs(config.getAll()) do
         if i == currentIndex then
             print("> " .. string.upper(setting.name) .. ": " .. tostring(setting.value))
         else
@@ -33,31 +33,31 @@ while true do
         if key == "w" then
             currentIndex = currentIndex - 1
             if currentIndex <= 0 then
-                currentIndex = #konfig.getAll()
+                currentIndex = #config.getAll()
             end
         elseif key == "s" then
             currentIndex = currentIndex + 1
-            if currentIndex > #konfig.getAll() then
+            if currentIndex > #config.getAll() then
                 currentIndex = 1
             end
         end
-        selection = konfig.getAll()[currentIndex]
+        selection = config.getAll()[currentIndex]
         drawConfig()
     elseif event == "key" then
         if key == 257 then -- on enter
-            term.setCursorPos(1, 8 + #konfig.getAll() + 1)
+            term.setCursorPos(1, 8 + #config.getAll() + 1)
             if type(selection.value) == "boolean" then
-                konfig.set(selection.name, not selection.value)
+                config.set(selection.name, not selection.value)
             else
-                term.setCursorPos(1, 8 + #konfig.getAll() + 1)
+                term.setCursorPos(1, 8 + #config.getAll() + 1)
                 local newValue = read()
                 if type(selection.value) == "number" then
-                    konfig.set(selection.name, tonumber(newValue) or 0)
+                    config.set(selection.name, tonumber(newValue) or 0)
                 elseif type(selection.value) == "string" then
-                    konfig.set(selection.name, tostring(newValue))
+                    config.set(selection.name, tostring(newValue))
                 end
             end
-            selection = konfig.getAll()[currentIndex]
+            selection = config.getAll()[currentIndex]
             drawConfig()
         elseif key == 259 then -- on backspace
             shell.run("/boot/boot_1.lua")

@@ -1,9 +1,9 @@
 _G.name = "ECoreOS"
 _G.version = "1.0"
 
-local konfig = require("/apis/konfig")
+local config = require("/apis/ec_config")
 
-if konfig.get("require_login") == true then
+if config.get("require_login") == true then
     term.setBackgroundColor(colors.red)
     if not fs.exists("/.account_info") then
         term.clear()

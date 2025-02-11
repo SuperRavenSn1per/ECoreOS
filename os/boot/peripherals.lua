@@ -1,17 +1,17 @@
-local konfig = require("/apis/konfig")
-local gui = require("/apis/ecore_gui")
+local config = require("/apis/ec_config")
+local gui = require("/apis/ec_gui")
 
 gui.setPrimary(term.current(), colors.blue)
 
 local currentIndex = 1
-local selection = konfig.getRequired()[currentIndex] or "nil"
+local selection = config.getRequired()[currentIndex] or "nil"
 
 local function drawRequired()
     gui.clearBox(7, gui.h)
     term.setCursorPos(1,7)
     print("Current Selection: " .. selection)
     term.setCursorPos(1,9)
-    for i,p in pairs(konfig.getRequired()) do
+    for i,p in pairs(config.getRequired()) do
         if i == currentIndex then
             print("> " .. p)
         else
@@ -35,27 +35,27 @@ while true do
         if key == "w" then
             currentIndex = currentIndex - 1
             if currentIndex <= 0 then
-                currentIndex = #konfig.getRequired()
+                currentIndex = #config.getRequired()
             end
         elseif key == "s" then
             currentIndex = currentIndex + 1
-            if currentIndex > #konfig.getRequired() then
+            if currentIndex > #config.getRequired() then
                 currentIndex = 1
             end
         end
-        selection = konfig.getRequired()[currentIndex] or "nil"
+        selection = config.getRequired()[currentIndex] or "nil"
         drawRequired()
     elseif event == "key" then
         if key == 257 then -- on enter
-            term.setCursorPos(1, 9 + #konfig.getRequired() + 1)
+            term.setCursorPos(1, 9 + #config.getRequired() + 1)
             local newRequired = read()
-            konfig.require(newRequired)
-            selection = konfig.getRequired()[currentIndex] or "nil"
+            config.require(newRequired)
+            selection = config.getRequired()[currentIndex] or "nil"
             drawRequired()
     elseif key == 261 then -- on del
-            konfig.unrequire(selection)
+            config.unrequire(selection)
             currentIndex = 1
-            selection = konfig.getRequired()[currentIndex] or "nil"
+            selection = config.getRequired()[currentIndex] or "nil"
             drawRequired()
     elseif key == 259 then -- on backspace
             shell.run("/boot/boot_1.lua")

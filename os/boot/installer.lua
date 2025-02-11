@@ -1,5 +1,5 @@
-local konfig = require("/apis/konfig")
-local gui = require("/apis/ecore_gui")
+local config = require("/apis/ec_config")
+local gui = require("/apis/ec_gui")
 
 local apps = {
     "SecureDoor",
@@ -46,10 +46,10 @@ while true do
             end
             gui.print("Main installation complete. Setting up configuration...")
             for i,config in pairs(data.default_config) do
-                konfig.set(config.name, config.value)
+                config.set(config.name, config.value)
             end
             for i,req in pairs(data.required) do
-                konfig.require(req)
+                config.require(req)
             end
             gui.print("Installation complete. Rebooting...")
             sleep(3)
